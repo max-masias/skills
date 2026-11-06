@@ -1,0 +1,45 @@
+{
+  "numero": "BORRADOR",
+  "fecha_emision": "2026-11-05",
+  "fecha_vencimiento": "2026-12-05",
+  "periodo": "julio 2023",
+  "cuentas": [
+    {
+      "cuenta": "177415703619",
+      "ambiente": "Producción",
+      "total_aws_usd": "438.24",
+      "total_declarado_pdf": "438.24"
+    },
+    {
+      "cuenta": "896468441061",
+      "ambiente": "UAT – Pruebas de usuario",
+      "total_aws_usd": "204.20",
+      "total_declarado_pdf": "204.20"
+    }
+  ],
+  "lineas_factura": 16,
+  "consumo_aws_usd": "642.44",
+  "valor_venta_usd": "642.44",
+  "igv_usd": "115.64",
+  "total_usd": "758.08",
+  "detraccion_usd": "90.97",
+  "detraccion_pen": null,
+  "neto_a_pagar_usd": "667.11",
+  "tipo_cambio": null,
+  "controles_fallidos": [],
+  "verificaciones_cruzadas_fallidas": [],
+  "campos_pendientes_config": [
+    "emisor.razon_social",
+    "emisor.ruc",
+    "emisor.direccion",
+    "emisor.cuentas_bancarias[0].banco",
+    "emisor.cuentas_bancarias[0].cuenta",
+    "emisor.cuentas_bancarias[0].cci",
+    "emisor.cuenta_detracciones_bn",
+    "cliente.ruc",
+    "cliente.direccion",
+    "cliente.atencion"
+  ],
+  "estados_estimados": true,
+  "archivo_pdf": "C:\\Users\\chris\\OneDrive\\Desktop\\Cosas Chris\\Pasantia Tedregal\\Claude_skills\\skills\\Generador_facturas_AWS\\Factura_generada\\2023-07\\BORRADOR_ACRES_AWS_2023-07.pdf"
+}

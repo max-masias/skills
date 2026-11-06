@@ -1,0 +1,69 @@
+{
+  "_instrucciones": "Datos fijos de la factura. Complete una sola vez todo lo marcado [COMPLETAR]; el generador resalta en la factura cualquier campo que siga pendiente. Los importes de AWS se toman siempre de los PDF, nunca de aquí.",
+
+  "emisor": {
+    "razon_social": "[COMPLETAR] RAZÓN SOCIAL DEL EMISOR S.A.C.",
+    "nombre_comercial": "",
+    "ruc": "[COMPLETAR]",
+    "direccion": "[COMPLETAR] Av. ..., Distrito, Lima - Perú",
+    "telefono": "",
+    "email": "",
+    "web": "",
+    "logo": "",
+    "cuentas_bancarias": [
+      {"banco": "[COMPLETAR] Banco", "moneda": "USD", "cuenta": "[COMPLETAR]", "cci": "[COMPLETAR]"}
+    ],
+    "cuenta_detracciones_bn": "[COMPLETAR] N° cuenta de detracciones Banco de la Nación"
+  },
+
+  "cliente": {
+    "razon_social": "ACRES SOCIEDAD ADMINISTRADORA DE FONDOS S.A.",
+    "nombre_corto": "ACRES SAFI",
+    "ruc": "[COMPLETAR]",
+    "direccion": "[COMPLETAR] Dirección fiscal de ACRES",
+    "atencion": "[COMPLETAR] Nombre del encargado",
+    "cargo": "Gerencia de Administración y Finanzas",
+    "email": ""
+  },
+
+  "documento": {
+    "titulo": "FACTURA",
+    "serie": "F001",
+    "correlativo": 1,
+    "moneda": "USD",
+    "forma_pago": "Crédito",
+    "dias_credito": 30,
+    "unidad_medida": "ZZ",
+    "unidad_medida_texto": "Servicio",
+    "agrupar_por": "servicio",
+    "incluir_items_sin_costo_en_anexo": false
+  },
+
+  "tributos": {
+    "aplicar_igv": true,
+    "igv_tasa": 0.18,
+    "detraccion": {
+      "aplicar": true,
+      "tasa": 0.12,
+      "codigo": "037",
+      "descripcion": "Demás servicios gravados con el IGV",
+      "monto_minimo_pen": 700
+    }
+  },
+
+  "cargos_adicionales": {
+    "cargo_gestion_porcentaje": 0,
+    "cargo_gestion_fijo_usd": 0,
+    "concepto": "Servicio de administración y gestión de la plataforma AWS"
+  },
+
+  "cuentas_aws": {
+    "177415703619": {"ambiente": "Producción", "codigo": "PRD"},
+    "896468441061": {"ambiente": "UAT – Pruebas de usuario", "codigo": "UAT"}
+  },
+
+  "observaciones": [
+    "Importes en dólares americanos según los estados de cuenta emitidos por Amazon Web Services, Inc. para el período facturado.",
+    "El detalle de consumo por servicio, región y concepto se presenta en los anexos de este documento."
+  ]
+}

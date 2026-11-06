@@ -1,0 +1,482 @@
+{
+  "client": {
+    "name": "NT369 S.A.C.",
+    "industry": "Fintech / Servicios Financieros Digitales",
+    "context_notes": "Empresa peruana que opera bajo la marca BT369/LUCA. Desarrolla plataforma de préstamos inmediatos con garantía conectando Prestamistas y Prestatarios mediante geolocalización en tiempo real. Producto de referencia: Uber para préstamos con garantía."
+  },
+  "document": {
+    "filename": "Luca-proyecto.pdf",
+    "language": "Español",
+    "source_type": "pdf",
+    "extracted_sections": [
+      "Perfil de Prestamista y requisitos KYC",
+      "Funciones del panel / app del Prestamista",
+      "Seguridad y garantías (mecanismos)",
+      "Contrato marco para Prestamistas (extracto)",
+      "Sistema de reputación Bronce/Plata/Oro",
+      "Módulo de pagos y cobranza automática",
+      "Módulos del Web Admin (9 módulos detallados)",
+      "APIs Mobile (listado completo)",
+      "Cronograma detallado de tareas (Backend + QA)",
+      "Cronograma resumen con horas por recurso",
+      "Diagrama de arquitectura (App LUCA, Django, Redis, pasarelas)"
+    ]
+  },
+  "business_context": {
+    "problem_statement": "No existe una plataforma digital que conecte de forma ágil, segura y geolocalizada a personas con capacidad de prestar dinero (Prestamistas) con personas que necesitan préstamos inmediatos respaldados por garantías físicas (celular, laptop, moto, joya), sin depender de entidades bancarias tradicionales.",
+    "goals": [
+      "Crear un marketplace de préstamos P2P con garantía física operando en tiempo real mediante geolocalización",
+      "Automatizar el ciclo completo del préstamo: solicitud → matching → contrato digital → desembolso → cobranza → ejecución de garantía",
+      "Implementar sistema KYC/biométrico para verificación de identidad de ambas partes",
+      "Proveer panel Web Admin completo para gestión operativa, reportes y control de riesgos",
+      "Escalar la confianza mediante sistema de reputación por puntos (Bronce, Plata, Oro) que define montos máximos",
+      "Integrar cobro automatizado con pasarelas peruanas (Culqi/Izipay) y recordatorios por WhatsApp/Firebase"
+    ],
+    "success_metrics": [
+      "Matching exitoso entre Prestamista y Prestatario en tiempo real con geolocalización",
+      "Tasa de mora gestionada automáticamente por jobs programados",
+      "KYC biométrico completado por >X% de usuarios registrados (umbral no especificado)",
+      "Préstamos desembolsados con contrato digital firmado por ambas partes",
+      "Sistema de calificación activo con puntuación visible en mapa"
+    ],
+    "constraints": [
+      "Cronograma Backend: 143 días calendario (sep 2025 – mar 2026) — dato explícito del documento",
+      "Recursos explícitos en cronograma: Backend (1.124 h) + QA (52 h) — Frontend no cuantificado",
+      "Pasarelas de pago limitadas a mercado peruano: Culqi e Izipay como prioridad (Stripe como alternativa)",
+      "Montos máximos por rango de reputación: Bronce S/500, Plata S/2.000, Oro S/5.000+",
+      "Presupuesto total: No especificado",
+      "Compliance regulatorio SBS/BCRP: No especificado en documento"
+    ]
+  },
+  "scope": {
+    "in_scope": [
+      "App Móvil (React Native) para Prestamista y Cliente/Prestatario",
+      "Web Admin (panel de gestión NT369 / soporte / administrador)",
+      "Módulo de Seguridad: permisos API, CSRF/XSS/Brute Force, auditoría de logs",
+      "Gestión de Usuarios: CRUD Clientes, Prestamistas, Admins + KYC biométrico",
+      "Perfiles de Confianza y Calificaciones (niveles Bronce/Plata/Oro)",
+      "Gestión de Roles y Permisos (Web + Mobile)",
+      "Configuración de Sistema: pasarelas de pago, métodos de pago, integraciones externas",
+      "Módulo de Préstamos completo: configuración, flujos, estados, comisiones, contratos, notificaciones, chat, cobro, comprobantes, jobs automáticos, dashboard, reportes",
+      "Seguros de Préstamos: configuración, definición, proceso de reclamo",
+      "Módulo de Soporte: panel de casos, chat con soporte, asignación de agentes",
+      "Monitoreo de APP: dashboard de logs",
+      "APIs Mobile completas (autenticación, perfil, préstamos, pagos, notificaciones, soporte, términos y condiciones)",
+      "Geolocalización en tiempo real (Google Maps / Yandex Maps)",
+      "Chat en tiempo real con encriptación (Django Channels + Redis + WebSocket)",
+      "Pagos automáticos: tokenización de tarjetas, agenda de cobros, reintentos, comprobantes PDF",
+      "Notificaciones: WhatsApp (Twilio/Zenvia) + Push (Firebase)",
+      "Contrato digital con firma electrónica para ambas partes",
+      "Proceso de desembolso de préstamo via pasarela",
+      "Proceso de ejecución de garantía ante mora",
+      "Manuales técnico y de usuario",
+      "Instalación y despliegue (servidor, Docker, Redis, BD)"
+    ],
+    "out_of_scope": [
+      "Desarrollo del Frontend Web Admin (no incluido en cronograma entregado — requiere confirmación)",
+      "Gestión legal/notarial de ejecución de garantías físicas (mencionado como proceso externo a NT369)",
+      "Scoring crediticio externo (Equifax, Experian, Sentinel Perú) — no especificado",
+      "Integración con RENIEC para validación de DNI en tiempo real — no especificado",
+      "Panel para Prestatario en Web (solo Mobile según documento)",
+      "Funcionalidades de criptoactivos como garantía (aparece en mockup pero no en requisitos)",
+      "App publicada en AppStore/PlayStore (proceso de publicación) — no especificado",
+      "Infraestructura cloud (proveedor, sizing, costos) — no especificados"
+    ],
+    "assumptions": [
+      "El backend se desarrollará en Python/Django según tecnologías explícitas en el documento",
+      "La App Móvil se desarrollará en React Native (mencionado en diagrama de arquitectura)",
+      "Base de datos principal es PostgreSQL (BD_Prestamista en diagrama)",
+      "Redis se usará para WebSockets (Django Channels) y caché",
+      "El equipo de desarrollo es externo a NT369 (proveedor de software)",
+      "Los certificados de firma digital y cuentas de pasarelas son responsabilidad del cliente",
+      "La validación biométrica se implementará con SDK externo (no especificado cuál)",
+      "El cronograma del cliente (sep 2025 – mar 2026) se toma como referencia de estimación; las fechas exactas requieren validación"
+    ]
+  },
+  "requirements": {
+    "functional": [
+      {
+        "id": "FR-001",
+        "title": "Registro y KYC de Prestamistas",
+        "description": "El sistema debe permitir el registro de Prestamistas con validación de identidad (DNI/carnet de extranjería), cuenta bancaria, selfie/biométrica, firma digital del contrato marco y depósito de seguridad opcional.",
+        "priority": "Must",
+        "acceptance_criteria": [
+          "Usuario puede registrar DNI y documentos de identidad",
+          "Validación biométrica o selfie con DNI procesada y aprobada/rechazada",
+          "Firma digital del contrato marco NT369 registrada con fecha y hora",
+          "Cuenta bancaria verificada para desembolsos"
+        ],
+        "dependencies": ["FR-003", "FR-004"]
+      },
+      {
+        "id": "FR-002",
+        "title": "Activación de disponibilidad y geolocalización del Prestamista",
+        "description": "El Prestamista puede activar/desactivar su disponibilidad para prestar desde la app. Al activar, se registra su geolocalización en tiempo real y aparece en el mapa de solicitudes cercanas.",
+        "priority": "Must",
+        "acceptance_criteria": [
+          "Botón 'Estoy disponible para prestar' activa geolocalización",
+          "Posición del Prestamista actualizada en tiempo real en el mapa",
+          "Prestamista puede desactivar disponibilidad en cualquier momento"
+        ],
+        "dependencies": ["FR-001"]
+      },
+      {
+        "id": "FR-003",
+        "title": "Solicitud de préstamo por Prestatario/Cliente",
+        "description": "El Cliente puede crear una solicitud de préstamo especificando monto, tipo de garantía (celular, laptop, moto, joya, etc.), fotos del bien, detalles y ubicación GPS.",
+        "priority": "Must",
+        "acceptance_criteria": [
+          "Formulario de solicitud con campos: monto, tipo de garantía, marca/modelo, número de serie, fotos",
+          "Ubicación GPS del cliente capturada y registrada",
+          "Solicitud guardada con estado 'Pendiente'",
+          "Opción de agregar seguro al préstamo"
+        ],
+        "dependencies": ["FR-004"]
+      },
+      {
+        "id": "FR-004",
+        "title": "Matching en tiempo real: ver solicitudes cercanas",
+        "description": "El Prestamista activo visualiza en un mapa en tiempo real las solicitudes de préstamo cercanas a su ubicación, con ficha rápida (monto, tipo de garantía, distancia).",
+        "priority": "Must",
+        "acceptance_criteria": [
+          "Mapa muestra solicitudes activas dentro del radio de cobertura configurado",
+          "Ficha rápida muestra: monto, garantía, distancia",
+          "Actualización en tiempo real sin necesidad de refrescar"
+        ],
+        "dependencies": ["FR-002", "FR-003"]
+      },
+      {
+        "id": "FR-005",
+        "title": "Aceptación de préstamo y coordinación de encuentro",
+        "description": "El Prestamista puede aceptar una solicitud, recibir datos completos del cliente y coordinar el encuentro para entrega de garantía y firma de contrato mediante chat o llamada dentro de la app.",
+        "priority": "Must",
+        "acceptance_criteria": [
+          "Al aceptar, el Prestamista recibe: datos del cliente, ubicación, detalles de garantía y propuesta de contrato",
+          "Chat en tiempo real habilitado entre ambas partes",
+          "Funcionalidad de llamada disponible dentro de la app",
+          "Notificación al cliente cuando el Prestamista acepta su solicitud"
+        ],
+        "dependencies": ["FR-004", "FR-010"]
+      },
+      {
+        "id": "FR-006",
+        "title": "Firma digital de contrato de préstamo",
+        "description": "Ambas partes (Prestamista y Cliente) deben firmar digitalmente el contrato de préstamo dentro de la plataforma antes del desembolso.",
+        "priority": "Must",
+        "acceptance_criteria": [
+          "Contrato generado automáticamente con datos del préstamo, partes, monto, cuotas, tasas y garantía",
+          "Firma digital del cliente registrada con OTP o biométrica",
+          "Firma digital del Prestamista registrada",
+          "Contrato almacenado y descargable en PDF"
+        ],
+        "dependencies": ["FR-005"]
+      },
+      {
+        "id": "FR-007",
+        "title": "Desembolso del préstamo",
+        "description": "Una vez firmado el contrato, el Prestamista puede desembolsar el préstamo en efectivo (confirmado por OTP del cliente) o por transferencia desde la app mediante pasarela de pagos.",
+        "priority": "Must",
+        "acceptance_criteria": [
+          "Modalidad efectivo: cliente genera código OTP para confirmar recepción",
+          "Modalidad transferencia: integración con pasarela (Culqi/Izipay) para envío de fondos",
+          "Registro del desembolso con fecha, hora y método",
+          "Calendario de pagos generado automáticamente al completar desembolso"
+        ],
+        "dependencies": ["FR-006", "FR-012"]
+      },
+      {
+        "id": "FR-008",
+        "title": "Cobranza automática y gestión de cuotas",
+        "description": "El sistema cobra cuotas automáticamente en las fechas pactadas mediante pasarela, envía recordatorios T-3 y T-1 días por WhatsApp, reintenta cobros fallidos hasta 2 veces en 48h y gestiona mora con penalidades.",
+        "priority": "Must",
+        "acceptance_criteria": [
+          "Cobro automático ejecutado en fecha pactada vía pasarela con token de tarjeta",
+          "Mensaje WhatsApp enviado T-3 días y T-1 día antes del vencimiento",
+          "Reintento automático de cobro 2 veces en 48h ante fallo",
+          "Comprobante PDF enviado por correo/WhatsApp al completar pago",
+          "Activación de aviso de mora y penalidad si no se paga en plazo",
+          "Alerta al Prestamista para iniciar ejecución de garantía tras X días de mora"
+        ],
+        "dependencies": ["FR-007", "FR-013"]
+      },
+      {
+        "id": "FR-009",
+        "title": "Sistema de reputación por niveles",
+        "description": "Cada usuario acumula puntos según su comportamiento en la plataforma. Los niveles (Bronce/Plata/Oro) determinan el monto máximo de préstamo y la prioridad en el mapa.",
+        "priority": "Must",
+        "acceptance_criteria": [
+          "Niveles: Bronce (0-10 pts, máx S/500), Plata (11-30 pts, máx S/2.000), Oro (31+ pts, máx S/5.000+)",
+          "Prestamistas Oro tienen prioridad en visualización del mapa",
+          "Sistema de calificación post-préstamo disponible para ambas partes",
+          "Historial de calificaciones visible en perfil"
+        ],
+        "dependencies": ["FR-001"]
+      },
+      {
+        "id": "FR-010",
+        "title": "Chat en tiempo real encriptado",
+        "description": "Chat en tiempo real entre Prestamista y Cliente (y con soporte) implementado con Django Channels, Redis y WebSockets. Mensajes encriptados, con historial, emoticons y adjunto de imágenes.",
+        "priority": "Must",
+        "acceptance_criteria": [
+          "Mensajes enviados y recibidos en tiempo real mediante WebSocket",
+          "Mensajes encriptados en tránsito y en reposo",
+          "Historial de mensajería persistente y consultable",
+          "Soporte para adjuntar imágenes/fotos",
+          "Chat de soporte reutilizable para casos de ayuda"
+        ],
+        "dependencies": []
+      },
+      {
+        "id": "FR-011",
+        "title": "Panel Web Admin — Gestión de préstamos y operaciones",
+        "description": "Panel administrativo para NT369 con gestión completa de usuarios, préstamos, seguros, soporte, configuraciones del sistema, jobs automáticos y monitoreo de logs.",
+        "priority": "Must",
+        "acceptance_criteria": [
+          "CRUD completo de usuarios (Clientes, Prestamistas, Admins)",
+          "Panel de préstamos con filtros, estados y cobranza manual",
+          "Dashboard con métricas clave",
+          "Reportes de préstamos, seguros y recaudación exportables",
+          "Panel de jobs con historial y control de ejecución",
+          "Panel de soporte con gestión de casos y asignación de agentes",
+          "Dashboard de logs de monitoreo de la app"
+        ],
+        "dependencies": ["FR-008", "FR-009"]
+      },
+      {
+        "id": "FR-012",
+        "title": "Integración con pasarelas de pago",
+        "description": "Integración con Culqi e Izipay para el mercado peruano (Stripe como alternativa). Soporte para métodos: tarjeta débito/crédito, Yape, Plin, transferencia bancaria.",
+        "priority": "Must",
+        "acceptance_criteria": [
+          "Tokenización segura de tarjetas para cobro recurrente",
+          "Botón 'Pagar ahora' funcional en app con redirección a pasarela segura",
+          "Soporte para Yape y Plin",
+          "Registro detallado de cada transacción",
+          "Manejo de errores y reintentos de pago"
+        ],
+        "dependencies": []
+      },
+      {
+        "id": "FR-013",
+        "title": "Módulo de Seguros de Préstamos",
+        "description": "Configuración y gestión de seguros opcionales para préstamos. El cliente puede agregar un seguro al solicitar el préstamo. Proceso de reclamo de seguro disponible.",
+        "priority": "Should",
+        "acceptance_criteria": [
+          "CRUD de tipos de seguros en Web Admin",
+          "Opción de agregar seguro al momento de la solicitud",
+          "Cobro del seguro procesado al confirmar el préstamo",
+          "Proceso de reclamo de seguro disponible para el cliente",
+          "Reportes de seguros en préstamos"
+        ],
+        "dependencies": ["FR-003", "FR-007"]
+      },
+      {
+        "id": "FR-014",
+        "title": "Proceso de ejecución de garantía",
+        "description": "Cuando un préstamo entra en mora avanzada, el sistema alerta al Prestamista y al equipo de NT369 para iniciar el proceso de ejecución de la garantía física.",
+        "priority": "Must",
+        "acceptance_criteria": [
+          "API para iniciar proceso de ejecución de garantía desde app del Prestamista",
+          "Registro y trazabilidad del proceso de ejecución",
+          "Notificación a NT369 para intervención del equipo legal"
+        ],
+        "dependencies": ["FR-008"]
+      },
+      {
+        "id": "FR-015",
+        "title": "Términos y condiciones dinámicos",
+        "description": "El sistema debe almacenar y versionar los términos y condiciones para Clientes y Prestamistas. Los usuarios deben aceptarlos explícitamente.",
+        "priority": "Must",
+        "acceptance_criteria": [
+          "API para consultar términos y condiciones vigentes",
+          "API para registrar la aceptación del usuario con fecha/hora/versión",
+          "Términos diferenciados para Cliente y Prestamista"
+        ],
+        "dependencies": []
+      }
+    ],
+    "non_functional": [
+      {
+        "id": "NFR-001",
+        "category": "Security",
+        "requirement": "Protección ante CSRF, XSS y Brute Force en todas las APIs",
+        "target": "Implementado y documentado según OWASP Top 10"
+      },
+      {
+        "id": "NFR-002",
+        "category": "Security",
+        "requirement": "Encriptación de mensajería en tránsito y en reposo",
+        "target": "TLS 1.2+ para tránsito; encriptación a nivel de campo para mensajes en BD"
+      },
+      {
+        "id": "NFR-003",
+        "category": "Security",
+        "requirement": "Auditoría y logs de acceso completos",
+        "target": "Registro de todas las acciones de usuario con timestamp, IP y recurso accedido"
+      },
+      {
+        "id": "NFR-004",
+        "category": "Security",
+        "requirement": "Control de acceso basado en roles y permisos por módulo y acción",
+        "target": "RBAC implementado para Web (Admin) y Mobile (Cliente/Prestamista/Soporte)"
+      },
+      {
+        "id": "NFR-005",
+        "category": "Performance",
+        "requirement": "Geolocalización y matching en tiempo real",
+        "target": "Latencia de actualización de mapa < 3 segundos (No especificado; supuesto)"
+      },
+      {
+        "id": "NFR-006",
+        "category": "Performance",
+        "requirement": "Chat en tiempo real con WebSocket",
+        "target": "Entrega de mensajes < 1 segundo en condiciones normales de red"
+      },
+      {
+        "id": "NFR-007",
+        "category": "Availability",
+        "requirement": "Soporte 24/7 para el canal de ayuda de NT369",
+        "target": "No especificado SLA de uptime; requiere definición"
+      },
+      {
+        "id": "NFR-008",
+        "category": "Compliance",
+        "requirement": "KYC/AML: validación de identidad obligatoria para operar",
+        "target": "Verificación biométrica/selfie con DNI aprobada antes de primer préstamo"
+      },
+      {
+        "id": "NFR-009",
+        "category": "UX",
+        "requirement": "Interfaz mobile intuitiva similar a apps de ride-hailing (Uber)",
+        "target": "Flujo de solicitud-matching-desembolso completable en < 5 pasos desde la app"
+      },
+      {
+        "id": "NFR-010",
+        "category": "Other",
+        "requirement": "Despliegue en contenedores Docker con Redis y BD separados",
+        "target": "Backend + Redis + BD desplegados en Docker según cronograma"
+      }
+    ]
+  },
+  "data_and_integrations": {
+    "entities": [
+      {"name": "Usuario (Prestamista / Cliente / Admin)", "notes": "Entidad base con subtipo. Contiene datos personales, financieros, biométricos, GPS y nivel de reputación"},
+      {"name": "Solicitud de Préstamo", "notes": "Creada por Cliente; incluye monto, garantía, fotos, GPS, estado, seguro asociado"},
+      {"name": "Préstamo", "notes": "Generado al aceptar solicitud; incluye contrato, calendario de cuotas, estado, comisiones"},
+      {"name": "Cuota", "notes": "Parte del calendario de pagos; tiene fecha, monto, estado (pagada/pendiente/mora)"},
+      {"name": "Garantía", "notes": "Bien físico ofrecido: tipo, marca, modelo, serie, fotos, estado de ejecución"},
+      {"name": "Contrato", "notes": "Documento digital firmado por ambas partes; versionado por préstamo"},
+      {"name": "Seguro de Préstamo", "notes": "Opcional; asociado a un préstamo; tiene tipo, costo, proceso de reclamo"},
+      {"name": "Calificación / Reputación", "notes": "Puntos acumulados por usuario; determina nivel y límites de operación"},
+      {"name": "Chat / Mensaje", "notes": "Mensajes encriptados entre Prestamista-Cliente y Cliente-Soporte"},
+      {"name": "Caso de Soporte", "notes": "Incidente reportado por usuario; asignado a agente; con chat propio"},
+      {"name": "Transacción de Pago", "notes": "Registro de cada cobro o desembolso; incluye pasarela, monto, estado, comprobante"},
+      {"name": "Notificación", "notes": "Push (Firebase) o WhatsApp (Twilio); asociada a evento del préstamo"},
+      {"name": "Job Automático", "notes": "Proceso programado: mora, cobro, calificación, notificaciones; con historial de ejecución"},
+      {"name": "Log de Sistema", "notes": "Registro de auditoría de accesos y acciones en la plataforma"}
+    ],
+    "integrations": [
+      {"system": "Culqi", "direction": "outbound", "notes": "Pasarela de pago peruana; tokenización de tarjetas, cobros recurrentes, desembolsos"},
+      {"system": "Izipay", "direction": "outbound", "notes": "Pasarela de pago peruana; alternativa a Culqi para el mercado local"},
+      {"system": "Stripe", "direction": "outbound", "notes": "Mencionado como alternativa internacional a Culqi/Izipay"},
+      {"system": "Twilio / Zenvia", "direction": "outbound", "notes": "API de WhatsApp Business para recordatorios de pago, comprobantes y notificaciones"},
+      {"system": "Firebase", "direction": "outbound", "notes": "Push notifications para App Móvil (Android/iOS)"},
+      {"system": "Google Maps API", "direction": "both", "notes": "Geolocalización en tiempo real para mapa de prestamistas y clientes"},
+      {"system": "Yandex Maps", "direction": "both", "notes": "Mencionado como alternativa a Google Maps en el diagrama de arquitectura"},
+      {"system": "Proveedor biométrico / KYC (SDK)", "direction": "both", "notes": "No especificado; para validación de selfie con DNI y confirmación de identidad"}
+    ]
+  },
+  "open_questions": [
+    {
+      "id": "Q-001",
+      "question": "¿El alcance del proyecto incluye el desarrollo del Frontend Web Admin y la App Móvil (React Native), o solo el Backend + APIs? El cronograma entregado solo contempla Backend (1.124 h) y QA (52 h).",
+      "why_it_matters": "Si el Frontend no está incluido en el alcance propuesto, el costo y cronograma real será significativamente mayor. Esto es el mayor gap de la propuesta actual.",
+      "blocking_level": "High"
+    },
+    {
+      "id": "Q-002",
+      "question": "¿La App Móvil LUCA debe publicarse en iOS, Android o ambas plataformas? ¿Existe un presupuesto de cuentas de developer Apple ($99/año) y Google ($25 único)?",
+      "why_it_matters": "Impacta en costo de publicación, proceso de review de Apple (que puede demorar 1-4 semanas) y restricciones adicionales para apps financieras.",
+      "blocking_level": "High"
+    },
+    {
+      "id": "Q-003",
+      "question": "¿El proyecto debe cumplir con regulaciones de la SBS (Superintendencia de Banca y Seguros del Perú) o BCRP para operar como plataforma de préstamos P2P? ¿Existe asesoría legal fintech?",
+      "why_it_matters": "Las plataformas de préstamos en Perú pueden requerir licencias específicas. Esto impacta en el diseño de seguridad, almacenamiento de datos y flujos KYC/AML.",
+      "blocking_level": "High"
+    },
+    {
+      "id": "Q-004",
+      "question": "¿Cuál es el proveedor/SDK para la validación biométrica y verificación de DNI? (Ej: Truora, Metamap, Reniec-API, Jumio, etc.)",
+      "why_it_matters": "El módulo KYC es crítico para la seguridad y compliance. El SDK elegido determina el flujo de UX, los costos por validación y la disponibilidad de la API.",
+      "blocking_level": "High"
+    },
+    {
+      "id": "Q-005",
+      "question": "¿Cuál es el proveedor de infraestructura cloud (AWS, GCP, Azure, DigitalOcean)? ¿Existe ya un servidor o se contratará uno nuevo?",
+      "why_it_matters": "Afecta costos de despliegue, SLAs de disponibilidad y capacidad de escalar en picos de demanda.",
+      "blocking_level": "Medium"
+    },
+    {
+      "id": "Q-006",
+      "question": "¿Cuál es el SLA de disponibilidad requerido para la plataforma? (Ej: 99.9% uptime = máx 8.7 h/mes de downtime). ¿Se requiere ambiente de staging/UAT separado?",
+      "why_it_matters": "Define arquitectura de alta disponibilidad, necesidad de balanceo de carga y estrategia de backup.",
+      "blocking_level": "Medium"
+    },
+    {
+      "id": "Q-007",
+      "question": "El mockup de la app muestra 'Crypto Asset' como tipo de garantía. ¿Los criptoactivos son un tipo de garantía válido en la plataforma? ¿Requiere integración con exchanges o wallets?",
+      "why_it_matters": "Si los criptoactivos son garantía válida, se requiere integración adicional con exchanges/custodios, lo que añade complejidad regulatoria y técnica significativa.",
+      "blocking_level": "Medium"
+    },
+    {
+      "id": "Q-008",
+      "question": "¿Cuántos días de mora activan la alerta de ejecución de garantía? El documento menciona 'X días' sin definir el valor.",
+      "why_it_matters": "Es un parámetro de negocio clave para el flujo de cobro y la lógica de jobs automáticos.",
+      "blocking_level": "Low"
+    },
+    {
+      "id": "Q-009",
+      "question": "¿Cuál es el presupuesto total disponible para el proyecto (desarrollo + infraestructura + licencias de APIs)?",
+      "why_it_matters": "Permite priorizar el alcance y determinar si se ejecuta todo en una sola fase o se debe dividir en MVP + iteraciones.",
+      "blocking_level": "High"
+    }
+  ],
+  "risks": [
+    {
+      "risk": "Frontend Web Admin y App Móvil no están en el cronograma entregado, lo que puede generar desalineación de expectativas de costo y tiempo",
+      "impact": "High",
+      "mitigation": "Definir explícitamente en contrato si el Frontend está incluido y añadir estimación específica antes de firma"
+    },
+    {
+      "risk": "Cumplimiento regulatorio SBS/BCRP no validado; la plataforma puede requerir licencias o cambios arquitecturales costosos",
+      "impact": "High",
+      "mitigation": "Contratar asesoría legal fintech peruana antes del inicio del desarrollo para definir requisitos de compliance"
+    },
+    {
+      "risk": "Integración biométrica/KYC sin proveedor definido; puede causar retrasos si el SDK elegido tiene largo proceso de onboarding",
+      "impact": "High",
+      "mitigation": "Definir proveedor KYC en la fase de Discovery y gestionar contrato de API con anticipación"
+    },
+    {
+      "risk": "Complejidad del módulo de Solicitudes Préstamos (37 días en cronograma) con múltiples flujos de estado y geolocalización en tiempo real",
+      "impact": "High",
+      "mitigation": "Implementar pruebas de carga sobre el sistema de matching geolocalizado antes de lanzamiento"
+    },
+    {
+      "risk": "Dependencia de pasarelas de pago peruanas (Culqi/Izipay) con proceso de onboarding que puede demorar 4-8 semanas",
+      "impact": "Medium",
+      "mitigation": "Iniciar proceso de activación de cuentas en pasarelas desde la fase de Discovery"
+    },
+    {
+      "risk": "El chat en tiempo real con encriptación y WebSockets añade complejidad operativa (Django Channels + Redis); problemas de escalabilidad bajo carga",
+      "impact": "Medium",
+      "mitigation": "Definir límite de conexiones concurrentes y realizar prueba de carga antes del despliegue"
+    },
+    {
+      "risk": "Proceso de revisión de App Store (Apple) para apps financieras puede demorar y requerir cambios de UX",
+      "impact": "Medium",
+      "mitigation": "Iniciar proceso de publicación con 4+ semanas de anticipación y revisar políticas de Apple para apps de préstamos"
+    }
+  ]
+}

@@ -1,0 +1,199 @@
+{
+  "_nota": "Nombre comercial en español y código corto de cada servicio AWS tal como aparece en el estado de cuenta. Si un servicio no está aquí, el generador usa 'Amazon <nombre original>' y un código derivado; agréguelo para que quede bien escrito.",
+  "servicios": {
+    "Elastic Compute Cloud": {
+      "codigo": "EC2",
+      "nombre": "Amazon EC2 – Cómputo, discos EBS e IPs elásticas"
+    },
+    "Relational Database Service": {
+      "codigo": "RDS",
+      "nombre": "Amazon RDS – Base de datos relacional administrada"
+    },
+    "WAF": {
+      "codigo": "WAF",
+      "nombre": "AWS WAF – Firewall de aplicaciones web"
+    },
+    "Elastic Load Balancing": {
+      "codigo": "ELB",
+      "nombre": "Elastic Load Balancing – Balanceo de carga"
+    },
+    "Global Accelerator": {
+      "codigo": "GA",
+      "nombre": "AWS Global Accelerator – Aceleración de red global"
+    },
+    "Data Transfer": {
+      "codigo": "DT",
+      "nombre": "AWS Data Transfer – Transferencia de datos"
+    },
+    "Simple Storage Service": {
+      "codigo": "S3",
+      "nombre": "Amazon S3 – Almacenamiento de objetos"
+    },
+    "CloudWatch": {
+      "codigo": "CW",
+      "nombre": "Amazon CloudWatch – Monitoreo y alarmas"
+    },
+    "Key Management Service": {
+      "codigo": "KMS",
+      "nombre": "AWS KMS – Gestión de llaves de cifrado"
+    },
+    "Virtual Private Cloud": {
+      "codigo": "VPC",
+      "nombre": "Amazon VPC – Red privada virtual e IPs públicas"
+    },
+    "Secrets Manager": {
+      "codigo": "SM",
+      "nombre": "AWS Secrets Manager – Gestión de secretos"
+    },
+    "DynamoDB": {
+      "codigo": "DDB",
+      "nombre": "Amazon DynamoDB – Base de datos NoSQL"
+    },
+    "Simple Notification Service": {
+      "codigo": "SNS",
+      "nombre": "Amazon SNS – Servicio de notificaciones"
+    },
+    "Simple Queue Service": {
+      "codigo": "SQS",
+      "nombre": "Amazon SQS – Colas de mensajes"
+    },
+    "Simple Email Service": {
+      "codigo": "SES",
+      "nombre": "Amazon SES – Envío de correo electrónico"
+    },
+    "Lambda": {
+      "codigo": "LMB",
+      "nombre": "AWS Lambda – Cómputo sin servidor"
+    },
+    "CloudFront": {
+      "codigo": "CF",
+      "nombre": "Amazon CloudFront – Red de distribución de contenido (CDN)"
+    },
+    "Route 53": {
+      "codigo": "R53",
+      "nombre": "Amazon Route 53 – DNS administrado"
+    },
+    "Elastic Container Service": {
+      "codigo": "ECS",
+      "nombre": "Amazon ECS – Orquestación de contenedores"
+    },
+    "Elastic Container Registry (ECR)": {
+      "codigo": "ECR",
+      "nombre": "Amazon ECR – Registro de contenedores"
+    },
+    "EC2 Container Registry (ECR)": {
+      "codigo": "ECR",
+      "nombre": "Amazon ECR – Registro de contenedores"
+    },
+    "Elastic Kubernetes Service": {
+      "codigo": "EKS",
+      "nombre": "Amazon EKS – Kubernetes administrado"
+    },
+    "Elastic File System": {
+      "codigo": "EFS",
+      "nombre": "Amazon EFS – Sistema de archivos administrado"
+    },
+    "Backup": {
+      "codigo": "BKP",
+      "nombre": "AWS Backup – Copias de respaldo"
+    },
+    "CloudTrail": {
+      "codigo": "CT",
+      "nombre": "AWS CloudTrail – Auditoría de actividad"
+    },
+    "Config": {
+      "codigo": "CFG",
+      "nombre": "AWS Config – Registro de configuración"
+    },
+    "GuardDuty": {
+      "codigo": "GD",
+      "nombre": "Amazon GuardDuty – Detección de amenazas"
+    },
+    "Security Hub": {
+      "codigo": "SH",
+      "nombre": "AWS Security Hub – Postura de seguridad"
+    },
+    "Shield": {
+      "codigo": "SHD",
+      "nombre": "AWS Shield – Protección DDoS"
+    },
+    "Systems Manager": {
+      "codigo": "SSM",
+      "nombre": "AWS Systems Manager – Administración de servidores"
+    },
+    "API Gateway": {
+      "codigo": "APIG",
+      "nombre": "Amazon API Gateway – Publicación de APIs"
+    },
+    "ElastiCache": {
+      "codigo": "EC",
+      "nombre": "Amazon ElastiCache – Caché en memoria"
+    },
+    "Cognito": {
+      "codigo": "COG",
+      "nombre": "Amazon Cognito – Identidad de usuarios"
+    },
+    "Certificate Manager": {
+      "codigo": "ACM",
+      "nombre": "AWS Certificate Manager – Certificados SSL/TLS"
+    },
+    "Directory Service": {
+      "codigo": "DS",
+      "nombre": "AWS Directory Service – Directorio activo administrado"
+    },
+    "WorkSpaces": {
+      "codigo": "WS",
+      "nombre": "Amazon WorkSpaces – Escritorios virtuales"
+    },
+    "Transfer Family": {
+      "codigo": "TF",
+      "nombre": "AWS Transfer Family – Transferencia SFTP/FTPS"
+    },
+    "Glue": {
+      "codigo": "GLU",
+      "nombre": "AWS Glue – Integración de datos (ETL)"
+    },
+    "Athena": {
+      "codigo": "ATH",
+      "nombre": "Amazon Athena – Consultas SQL sobre S3"
+    },
+    "Step Functions": {
+      "codigo": "SFN",
+      "nombre": "AWS Step Functions – Orquestación de flujos"
+    },
+    "Support (Business)": {
+      "codigo": "SUP",
+      "nombre": "AWS Support (Business) – Soporte técnico"
+    },
+    "Support (Developer)": {
+      "codigo": "SUP",
+      "nombre": "AWS Support (Developer) – Soporte técnico"
+    },
+    "Savings Plans for AWS Compute usage": {
+      "codigo": "SP",
+      "nombre": "AWS Savings Plans – Compromiso de uso de cómputo"
+    }
+  },
+  "regiones": {
+    "Any": "Global (sin región)",
+    "US East (N. Virginia)": "EE.UU. Este – N. Virginia (us-east-1)",
+    "US East (Ohio)": "EE.UU. Este – Ohio (us-east-2)",
+    "US West (N. California)": "EE.UU. Oeste – N. California (us-west-1)",
+    "US West (Oregon)": "EE.UU. Oeste – Oregón (us-west-2)",
+    "South America (Sao Paulo)": "Sudamérica – São Paulo (sa-east-1)",
+    "Canada (Central)": "Canadá – Central (ca-central-1)",
+    "EU (Ireland)": "Europa – Irlanda (eu-west-1)",
+    "EU (London)": "Europa – Londres (eu-west-2)",
+    "EU (Paris)": "Europa – París (eu-west-3)",
+    "EU (Frankfurt)": "Europa – Fráncfort (eu-central-1)",
+    "EU (Stockholm)": "Europa – Estocolmo (eu-north-1)",
+    "Europe (Spain)": "Europa – España (eu-south-2)",
+    "Asia Pacific (Tokyo)": "Asia Pacífico – Tokio (ap-northeast-1)",
+    "Asia Pacific (Seoul)": "Asia Pacífico – Seúl (ap-northeast-2)",
+    "Asia Pacific (Singapore)": "Asia Pacífico – Singapur (ap-southeast-1)",
+    "Asia Pacific (Sydney)": "Asia Pacífico – Sídney (ap-southeast-2)",
+    "Asia Pacific (Mumbai)": "Asia Pacífico – Bombay (ap-south-1)",
+    "Asia Pacific (Hong Kong)": "Asia Pacífico – Hong Kong (ap-east-1)",
+    "Middle East (Bahrain)": "Medio Oriente – Baréin (me-south-1)"
+  }
+}

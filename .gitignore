@@ -1,0 +1,27 @@
+# --- No subir al repositorio ---
+
+# Código fuente de clientes y compilados (confidencial y muy pesado)
+Zips/
+
+# Dependencias y archivos temporales
+node_modules/
+__pycache__/
+*.pyc
+~$*
+.~lock*
+desktop.ini
+Thumbs.db
+.DS_Store
+
+# Material antiguo archivado durante la reorganización
+_archivo/
+aplicar_orden.ps1
+
+# Configuración personal de Claude Code (permisos y rutas de este equipo)
+.claude/settings.local.json
+
+# Archivos de trabajo intermedios de las skills
+Generador_informes_MD/Informe_generado/_trabajo/
+
+# Registro local de la reorganización
+REORGANIZACION.txt

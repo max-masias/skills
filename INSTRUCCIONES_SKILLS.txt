@@ -1,0 +1,259 @@
+==========================================================================
+ SKILLS DE CLAUDE - TEDREGAL
+ Instrucciones de uso
+==========================================================================
+
+CONTENIDO
+  1. Qué es esto y cómo está organizado
+  2. Preparar el equipo (una sola vez)
+  3. Cómo llamar a una skill
+  4. Instrucciones por skill
+  5. Problemas frecuentes
+
+
+--------------------------------------------------------------------------
+1. QUÉ ES ESTO Y CÓMO ESTÁ ORGANIZADO
+--------------------------------------------------------------------------
+
+Una "skill" es un paquete de instrucciones (y a veces scripts) que le enseña
+a Claude Code a hacer una tarea concreta siempre de la misma forma.
+
+  Prueba Skills Claude\
+  |-- .claude\skills\            Las 12 skills (una carpeta por skill)
+  |-- Generador_facturas_AWS\    Proyecto de la skill factura-aws-acres
+  |   |-- Comprobantes_AWS\        -> aquí van los PDF de AWS
+  |   |-- Datos_Factura\           -> datos del emisor, de ACRES y numeración
+  |   |-- Factura_generada\        -> aquí salen las facturas
+  |-- Generador_informes_MD\     Proyecto de la skill informe-desde-md
+  |   |-- Archivos_MD\             -> aquí van los .md de entrada
+  |   |-- Informe_generado\        -> aquí salen los informes
+  |-- entradas\                  Archivos de entrada del resto de skills
+  |                                (Word, PDF de requerimientos, etc.)
+  |-- salidas\                   Resultados, una subcarpeta por skill
+  |-- CLAUDE.md                  Instrucciones para Claude (no editar salvo
+  |                                que se cambien las skills)
+  |-- INSTRUCCIONES_SKILLS.txt   Este archivo
+  |-- requirements.txt           Librerías de Python necesarias
+
+Regla general: lo que se le da a una skill va en su carpeta de entrada y
+lo que produce aparece en su carpeta de salida. Nunca se escribe nada
+dentro de .claude\.
+
+
+--------------------------------------------------------------------------
+2. PREPARAR EL EQUIPO (UNA SOLA VEZ)
+--------------------------------------------------------------------------
+
+a) Claude Code: en la terminal, en VS Code / Antigravity (extensión de
+   Claude) o en la app de escritorio.
+
+b) Python 3.10 o superior (python.org o Anaconda). Comprobar en una
+   terminal:   python --version
+
+c) Librerías: abrir una terminal en la carpeta "Prueba Skills Claude" y
+   ejecutar:
+       python -m pip install -r requirements.txt
+   (si "python" no funciona, probar con "py").
+
+d) Opcional: pandoc (https://pandoc.org) mejora la conversión de Word a
+   Markdown. Sin pandoc la skill docx-a-markdown funciona igual.
+
+e) Abrir SIEMPRE la carpeta "Prueba Skills Claude" completa en el editor
+   (no una subcarpeta). Así Claude Code carga las skills y el CLAUDE.md.
+
+
+--------------------------------------------------------------------------
+3. CÓMO LLAMAR A UNA SKILL
+--------------------------------------------------------------------------
+
+Hay dos formas, en el chat de Claude Code:
+
+  - Con el comando:  escribir "/" y el nombre, por ejemplo
+        /factura-aws-acres
+    Al escribir "/" aparece la lista; se puede filtrar escribiendo parte
+    del nombre (por ejemplo "/fact").
+
+  - Pidiéndolo con palabras: "genera la factura de AWS para ACRES",
+    "hazme un análisis CAGE de ...". Claude elige la skill adecuada.
+
+Para señalar un archivo concreto se escribe "@" y su ruta, por ejemplo
+@entradas/requerimientos.pdf. En las skills de factura e informe no hace
+falta: ya saben en qué carpeta buscar.
+
+Si se acaban de agregar o cambiar skills, cerrar el chat y abrir uno nuevo
+para que se vuelvan a cargar.
+
+
+--------------------------------------------------------------------------
+4. INSTRUCCIONES POR SKILL
+--------------------------------------------------------------------------
+
+..........................................................................
+4.1  /factura-aws-acres  -  Factura a ACRES por servicios de AWS
+..........................................................................
+Qué hace : Lee los estados de cuenta de AWS (un PDF por cuenta: PROD,
+           UAT...), verifica que todos los montos cuadren y genera la
+           factura en PDF para ACRES SAFI (Perú): IGV 18 %, detracción,
+           importe en letras y anexos con el detalle de consumo.
+Antes    : 1) Completar una vez Generador_facturas_AWS\Datos_Factura\
+              - cliente.json      (RUC, dirección y encargado de ACRES)
+              - emisor.json       (datos de la empresa que factura, bancos)
+              - facturacion.json  (serie, número de la próxima factura...)
+              Mientras quede algún [COMPLETAR], sale un BORRADOR que no
+              gasta número de factura.
+           2) Copiar los PDF de AWS del mes en
+              Generador_facturas_AWS\Comprobantes_AWS\
+Pedir    : /factura-aws-acres   o   "genera la factura de AWS de este mes"
+Resultado: Generador_facturas_AWS\Factura_generada\<AAAA-MM>\
+           Factura_<número>_ACRES_AWS_<AAAA-MM>.pdf
+           y el registro de facturas emitidas en registro_facturas.csv
+Notas    : No factura dos veces el mismo mes. Para rehacer una factura:
+           "regenera la factura de 2023-07". El PDF es el sustento; el
+           comprobante electrónico se emite en el sistema de facturación
+           de la empresa con el mismo número e importes.
+
+..........................................................................
+4.2  /informe-desde-md  -  Informe a partir de archivos Markdown
+..........................................................................
+Qué hace : Junta varios .md (por ejemplo, los últimos tickets del CRM y
+           los últimos merge requests integrados), los cruza (qué ticket
+           se resolvió con qué MR, qué quedó pendiente) y arma un informe
+           en Word, verificado contra las fuentes.
+Antes    : Copiar los .md en Generador_informes_MD\Archivos_MD\
+           (hay plantillas en .claude\skills\informe-desde-md\assets\
+           plantillas\ y una guía para prepararlos en
+           ...\references\preparar_entradas.md).
+Pedir    : /informe-desde-md   o   "créame el informe con los md"
+Resultado: Generador_informes_MD\Informe_generado\
+           Informe_<tema>_<fecha>.docx  (y el .md borrador)
+Notas    : Usa todos los .md de Archivos_MD salvo que se indiquen otros.
+           Si se pide, también genera una versión HTML.
+
+..........................................................................
+4.3  /propuesta-proyecto  -  Propuesta formal desde un RFP
+..........................................................................
+Qué hace : Analiza un documento de requerimientos (PDF, DOCX o TXT) y
+           prepara una propuesta: resumen ejecutivo, requerimientos
+           estructurados, trazabilidad, fases, cronograma, estimación,
+           riesgos, preguntas al cliente y borradores de correo.
+Antes    : Dejar el documento en entradas\
+Pedir    : /propuesta-proyecto @entradas/<archivo>.pdf
+Resultado: salidas\propuesta-proyecto\  (propuesta.docx, propuesta.md,
+           resumen_ejecutivo.md, requirementsSpec.json, trazabilidad.md,
+           emails_borrador.md)
+Notas    : No inventa costos ni fechas: lo que falta lo marca como
+           "No especificado" y lo convierte en preguntas.
+
+..........................................................................
+4.4  /cage-analisis  -  Análisis CAGE de distancia entre mercados
+..........................................................................
+Qué hace : Evalúa la distancia Cultural, Administrativa, Geográfica y
+           Económica entre la ubicación de Tedregal y la de los clientes
+           potenciales, con puntajes, impactos y mitigaciones.
+Datos    : ubicación de la empresa, ubicación de los clientes, industria y
+           servicios/productos (si falta alguno, lo pregunta).
+Pedir    : /cage-analisis Tedregal Lima, Perú -> clientes en Miami, USA;
+           industria cloud computing; servicios de desarrollo de software
+Resultado: salidas\cage-analisis\CAGE_Analisis__<origen>__<destino>__<industria>.md
+
+..........................................................................
+4.5  /create-icp  -  Perfil de cliente ideal (ICP) desde un CAGE
+..........................................................................
+Qué hace : Toma un análisis CAGE y un "Customer Target" y define el perfil
+           de empresa ideal: criterios de encaje, dolores, comité de
+           compra, disparadores, descalificadores y mensajes clave.
+Antes    : Tener un CAGE en salidas\cage-analisis\ (o indicar su ruta).
+Pedir    : /create-icp  Customer Target: "empresas no tecnológicas con
+           falta de herramientas digitales"
+Resultado: salidas\create-icp\ICP__<origen>__<destino>__<target>.md
+
+..........................................................................
+4.6  /docx-a-markdown  -  Convertir Word a Markdown
+..........................................................................
+Qué hace : Convierte un .docx en un .md limpio (títulos, listas, tablas,
+           negritas). Usa pandoc si está instalado; si no, Python.
+Antes    : Dejar el Word en entradas\ (o indicar su ruta).
+Pedir    : /docx-a-markdown @entradas/<archivo>.docx
+Resultado: salidas\docx-a-markdown\<archivo>.md
+
+..........................................................................
+4.7  /prepare-landing  -  Landing de Tedregal desde un Word
+..........................................................................
+Qué hace : Lee un Word con requerimientos de una página web, lo pasa a
+           Markdown estructurado y genera la landing en HTML con la
+           identidad visual de Tedregal.
+Antes    : Dejar el Word en entradas\
+Pedir    : /prepare-landing @entradas/<requerimientos>.docx
+Resultado: salidas\prepare-landing\pagina_tedregal.md y pagina_tedregal.html
+           (abrir el .html con doble clic para verlo)
+
+..........................................................................
+4.8  /frontend-tedregal  -  Páginas y componentes con la marca Tedregal
+..........................................................................
+Qué hace : Construye páginas, secciones o componentes web (hero, navbar,
+           tarjetas, CTA...) con los colores, tipografías y estilo
+           oficiales de Tedregal.
+Pedir    : /frontend-tedregal crea la página de servicios con 6 tarjetas
+Resultado: salidas\frontend-tedregal\
+
+..........................................................................
+4.9  /frontend-design  -  Interfaces web con diseño cuidado (genérico)
+..........................................................................
+Qué hace : Skill pública de Anthropic para interfaces web con una
+           dirección de diseño definida. Para lo que NO lleva la marca de
+           Tedregal (para eso, frontend-tedregal).
+Pedir    : /frontend-design crea un panel de control para ...
+Resultado: salidas\frontend-design\
+
+..........................................................................
+4.10 /html-generator  -  Herramientas web en un solo archivo HTML
+..........................................................................
+Qué hace : Crea herramientas interactivas autocontenidas (generadores de
+           documentos, dashboards, formularios, calculadoras) que se
+           abren con doble clic, sin servidor. Antes de construir, hace
+           un par de preguntas sobre la función y el estilo.
+Pedir    : /html-generator un generador de cotizaciones exportable a PDF
+Resultado: salidas\html-generator\<nombre>.html
+
+..........................................................................
+4.11 /balances  -  Reporte financiero en HTML
+..........................................................................
+Qué hace : Con datos en un bloque JSON (balance general, estado de
+           resultados, flujo de caja, KPIs, series) genera un reporte
+           financiero en HTML. Solo se activa con el comando /balances.
+Pedir    : /balances  y pegar el JSON (el formato está en la propia skill:
+           .claude\skills\balances\SKILL.md). Si faltan datos, el reporte
+           los marca como "Pendiente".
+Resultado: salidas\balances\<id>.html  y un registro en
+           salidas\balances\requests.txt
+
+..........................................................................
+4.12 /revisar-ingles  -  Corrector de inglés
+..........................................................................
+Qué hace : Corrige un texto en inglés (gramática, ortografía), sugiere
+           vocabulario más natural, le pone una nota del 1 al 10 y
+           explica en español cómo mejorarlo.
+Pedir    : /revisar-ingles  y pegar el texto
+Resultado: en el mismo chat (no crea archivos)
+
+
+--------------------------------------------------------------------------
+5. PROBLEMAS FRECUENTES
+--------------------------------------------------------------------------
+
+- No aparece la skill al escribir "/":
+  abrir la carpeta "Prueba Skills Claude" completa (no una subcarpeta) y
+  empezar un chat nuevo.
+
+- "No module named ..." o falta una librería:
+  python -m pip install -r requirements.txt
+
+- "python" no se reconoce:
+  usar "py" en su lugar, o reinstalar Python marcando "Add to PATH".
+
+- La factura sale como BORRADOR:
+  quedan campos [COMPLETAR] en Generador_facturas_AWS\Datos_Factura\.
+
+- Claude pide permiso para ejecutar comandos:
+  es normal la primera vez; se puede elegir "permitir siempre" para los
+  scripts de las skills.

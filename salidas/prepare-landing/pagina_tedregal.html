@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tedregal — Transformamos tus ideas en realidades tecnológicas</title>
+  <meta name="description" content="Desarrollo de software a medida, Cloud Computing (AWS/GCP) y QA Automation para empresas en Lima, Perú." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-base:     #05091a;
+      --bg-surface:  #0c1230;
+      --bg-card:     rgba(255,255,255,.04);
+      --bg-card-hov: rgba(255,255,255,.07);
+      --border:      rgba(255,255,255,.08);
+      --blue:        #3b82f6;
+      --blue-dk:     #1d4ed8;
+      --cyan:        #06b6d4;
+      --amber:       #f59e0b;
+      --green:       #10b981;
+      --text-1:      #ffffff;
+      --text-2:      rgba(255,255,255,.65);
+      --text-3:      rgba(255,255,255,.38);
+      --radius-sm:   8px;
+      --radius-md:   14px;
+      --radius-lg:   20px;
+      --shadow-card: 0 4px 32px rgba(0,0,0,.45);
+      --transition:  .25s cubic-bezier(.4,0,.2,1);
+      --max-w:       1160px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg-base); color: var(--text-1); line-height: 1.65; overflow-x: hidden; }
+    img { max-width: 100%; display: block; }
+    a { color: inherit; text-decoration: none; }
+
+    /* ── PROGRESS BAR ── */
+    #progress-bar {
+      position: fixed; top: 0; left: 0; z-index: 9999;
+      height: 3px; width: 0%;
+      background: linear-gradient(90deg, var(--blue), var(--cyan));
+      transition: width .1s linear;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 5%; height: 68px;
+      background: rgba(5,9,26,.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      transition: background var(--transition), box-shadow var(--transition);
+    }
+    nav.scrolled { background: rgba(5,9,26,.98); box-shadow: 0 4px 24px rgba(0,0,0,.4); }
+    .nav-logo { font-size: 1.45rem; font-weight: 800; letter-spacing: -.5px; color: var(--text-1); }
+    .nav-logo span { background: linear-gradient(135deg, var(--blue), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .nav-center { display: flex; gap: 2rem; list-style: none; }
+    .nav-center a { font-size: .875rem; font-weight: 500; color: var(--text-2); transition: color var(--transition); position: relative; }
+    .nav-center a::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 2px; background: linear-gradient(90deg, var(--blue), var(--cyan)); border-radius: 2px; transition: width var(--transition); }
+    .nav-center a:hover { color: var(--text-1); }
+    .nav-center a:hover::after { width: 100%; }
+    .nav-right { display: flex; align-items: center; gap: .75rem; }
+    .lang-toggle {
+      font-size: .8rem; font-weight: 600; color: var(--text-3);
+      background: none; border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: .3rem .7rem;
+      cursor: pointer; transition: all var(--transition);
+    }
+    .lang-toggle:hover { border-color: var(--blue); color: var(--blue); }
+    .nav-cta {
+      background: linear-gradient(135deg, var(--blue), var(--blue-dk));
+      color: var(--text-1); padding: .45rem 1.1rem; border-radius: var(--radius-sm);
+      font-size: .85rem; font-weight: 600;
+      transition: transform var(--transition), box-shadow var(--transition);
+      box-shadow: 0 4px 16px rgba(59,130,246,.3);
+    }
+    .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(59,130,246,.45); }
+    .hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: .3rem; }
+    .hamburger span { display: block; width: 22px; height: 2px; background: var(--text-1); border-radius: 2px; transition: all var(--transition); }
+    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+    .mobile-menu {
+      display: none; position: fixed; top: 68px; left: 0; right: 0;
+      background: rgba(5,9,26,.98); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border); z-index: 99; padding: 1.5rem 5%;
+    }
+    .mobile-menu.open { display: block; animation: slideDown .2s ease; }
+    @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    .mobile-menu ul { list-style: none; display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem; }
+    .mobile-menu a { font-size: 1rem; font-weight: 500; color: var(--text-2); }
+    .mobile-menu a:hover { color: var(--text-1); }
+    .mobile-cta { display: inline-block; background: linear-gradient(135deg, var(--blue), var(--blue-dk)); color: var(--text-1); padding: .6rem 1.4rem; border-radius: var(--radius-sm); font-weight: 600; font-size: .9rem; }
+
+    /* ── LAYOUT ── */
+    .container { max-width: var(--max-w); margin: 0 auto; padding: 0 5%; }
+    section { padding: 96px 0; }
+    .label {
+      display: inline-flex; align-items: center; gap: .4rem;
+      font-size: .72rem; font-weight: 700; letter-spacing: 2px;
+      text-transform: uppercase; color: var(--cyan); margin-bottom: .9rem;
+    }
+    .label::before { content: ''; display: block; width: 16px; height: 2px; background: var(--cyan); border-radius: 2px; }
+    h2.h2 { font-size: clamp(1.75rem, 3.5vw, 2.5rem); font-weight: 800; line-height: 1.2; letter-spacing: -.4px; color: var(--text-1); margin-bottom: .9rem; }
+    .gradient-text { background: linear-gradient(135deg, var(--blue) 0%, var(--cyan) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .section-sub { font-size: 1rem; color: var(--text-2); max-width: 560px; margin-bottom: 3.5rem; line-height: 1.7; }
+
+    /* ── REVEAL ── */
+    .reveal { opacity: 0; transform: translateY(30px); transition: opacity .65s ease, transform .65s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal-delay-1 { transition-delay: .1s; }
+    .reveal-delay-2 { transition-delay: .2s; }
+    .reveal-delay-3 { transition-delay: .3s; }
+    .reveal-delay-4 { transition-delay: .4s; }
+    .reveal-delay-5 { transition-delay: .5s; }
+
+    /* ── HERO ── */
+    #hero { position: relative; min-height: 100vh; display: flex; align-items: center; overflow: hidden; padding-top: 68px; }
+    .hero-bg {
+      position: absolute; inset: 0; z-index: 0;
+      background: radial-gradient(ellipse at 20% 50%, rgba(59,130,246,.18) 0%, transparent 55%),
+                  radial-gradient(ellipse at 80% 20%, rgba(6,182,212,.12) 0%, transparent 50%),
+                  radial-gradient(ellipse at 60% 80%, rgba(29,78,216,.15) 0%, transparent 50%),
+                  var(--bg-base);
+    }
+    .hero-grid {
+      position: absolute; inset: 0; z-index: 0;
+      background-image: linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+    .orb { position: absolute; border-radius: 50%; filter: blur(80px); pointer-events: none; z-index: 0; }
+    .orb-1 { width: 400px; height: 400px; top: 10%; left: -10%; background: rgba(59,130,246,.12); animation: float 9s ease-in-out infinite; }
+    .orb-2 { width: 300px; height: 300px; top: 40%; right: 5%; background: rgba(6,182,212,.1); animation: float 12s ease-in-out infinite reverse; }
+    .orb-3 { width: 250px; height: 250px; bottom: 10%; left: 30%; background: rgba(245,158,11,.07); animation: float 10s ease-in-out infinite 2s; }
+    @keyframes float { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-30px) scale(1.05); } }
+
+    .hero-content { position: relative; z-index: 1; max-width: 780px; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: .5rem;
+      background: rgba(59,130,246,.1); border: 1px solid rgba(59,130,246,.25);
+      color: var(--blue); border-radius: 50px;
+      padding: .35rem 1rem; font-size: .8rem; font-weight: 600;
+      letter-spacing: .5px; margin-bottom: 1.5rem;
+    }
+    .hero-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--cyan); animation: blink 2s infinite; }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
+    .typewriter { border-right: 2px solid var(--cyan); padding-right: 3px; animation: cursor .7s step-end infinite; }
+    @keyframes cursor { 0%, 100% { border-color: var(--cyan); } 50% { border-color: transparent; } }
+
+    #hero h1 { font-size: clamp(2.2rem, 5.5vw, 3.8rem); font-weight: 900; line-height: 1.1; letter-spacing: -.6px; margin-bottom: 1.4rem; }
+    #hero p.hero-sub { font-size: 1.1rem; color: var(--text-2); max-width: 600px; margin-bottom: 2.5rem; line-height: 1.75; }
+    .hero-btns { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 3rem; }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: .5rem;
+      background: linear-gradient(135deg, var(--blue), var(--blue-dk));
+      color: var(--text-1); padding: .85rem 2rem;
+      border-radius: var(--radius-sm); font-weight: 700; font-size: .95rem;
+      transition: transform var(--transition), box-shadow var(--transition);
+      box-shadow: 0 4px 20px rgba(59,130,246,.35);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(59,130,246,.5); }
+    .btn-secondary {
+      display: inline-flex; align-items: center; gap: .5rem;
+      background: transparent; color: var(--text-1);
+      border: 1px solid rgba(255,255,255,.2);
+      padding: .85rem 2rem; border-radius: var(--radius-sm);
+      font-weight: 600; font-size: .95rem;
+      transition: border-color var(--transition), background var(--transition), transform var(--transition);
+    }
+    .btn-secondary:hover { border-color: rgba(255,255,255,.45); background: rgba(255,255,255,.05); transform: translateY(-2px); }
+    .hero-trust { display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
+    .hero-trust-label { font-size: .75rem; color: var(--text-3); font-weight: 500; letter-spacing: .5px; text-transform: uppercase; }
+    .trust-chips { display: flex; gap: .5rem; flex-wrap: wrap; }
+    .trust-chip { background: rgba(255,255,255,.05); border: 1px solid var(--border); color: var(--text-3); font-size: .75rem; font-weight: 600; padding: .25rem .7rem; border-radius: 50px; }
+    .hero-scroll { position: absolute; bottom: 2.5rem; left: 50%; transform: translateX(-50%); z-index: 1; display: flex; flex-direction: column; align-items: center; gap: .4rem; color: var(--text-3); font-size: .75rem; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; }
+    .scroll-line { width: 1px; height: 40px; background: linear-gradient(to bottom, var(--text-3), transparent); animation: scrollPulse 2s ease-in-out infinite; }
+    @keyframes scrollPulse { 0%, 100% { opacity: .6; } 50% { opacity: 1; } }
+
+    /* ── STATS ── */
+    #stats { padding: 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: var(--bg-surface); }
+    .stats-inner { display: flex; flex-wrap: wrap; justify-content: space-around; padding: 2.5rem 5%; }
+    .stat { text-align: center; padding: .5rem 2rem; border-right: 1px solid var(--border); }
+    .stat:last-child { border-right: none; }
+    .stat-num { font-size: 2.2rem; font-weight: 800; background: linear-gradient(135deg, var(--blue), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .stat-lbl { font-size: .8rem; color: var(--text-3); margin-top: .2rem; font-weight: 500; }
+
+    /* ── ABOUT ── */
+    #about { background: var(--bg-base); }
+    .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: start; margin-bottom: 4rem; }
+    .about-text { font-size: .95rem; color: var(--text-2); margin-bottom: 1.1rem; line-height: 1.8; }
+    .about-text strong { color: var(--text-1); }
+    .pillar { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 1rem; transition: background var(--transition), border-color var(--transition); }
+    .pillar:hover { background: var(--bg-card-hov); border-color: rgba(59,130,246,.3); }
+    .pillar-head { display: flex; align-items: center; gap: .6rem; margin-bottom: .5rem; }
+    .pillar-icon { width: 8px; height: 8px; border-radius: 50%; background: linear-gradient(135deg, var(--blue), var(--cyan)); flex-shrink: 0; }
+    .pillar h3 { font-size: .9rem; font-weight: 700; color: var(--blue); }
+    .pillar p { font-size: .88rem; color: var(--text-2); line-height: 1.7; }
+    .badges { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1.5rem; }
+    .badge { background: rgba(59,130,246,.1); border: 1px solid rgba(59,130,246,.2); color: var(--blue); padding: .25rem .75rem; border-radius: 50px; font-size: .75rem; font-weight: 600; }
+
+    /* ── VALUES ── */
+    .values-header { text-align: center; margin-bottom: 2.5rem; }
+    .values-header h3 { font-size: 1.5rem; font-weight: 700; color: var(--text-1); margin-bottom: .5rem; }
+    .values-header p { font-size: .95rem; color: var(--text-2); }
+    .values-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
+    .value-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius-md); padding: 1.75rem;
+      text-align: center;
+      transition: background var(--transition), border-color var(--transition), transform var(--transition);
+    }
+    .value-card:hover { background: var(--bg-card-hov); border-color: rgba(59,130,246,.3); transform: translateY(-4px); }
+    .value-icon { width: 52px; height: 52px; border-radius: var(--radius-sm); background: linear-gradient(135deg, rgba(59,130,246,.2), rgba(6,182,212,.15)); border: 1px solid rgba(59,130,246,.2); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; }
+    .value-icon svg { width: 24px; height: 24px; stroke: var(--cyan); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .value-card h4 { font-size: .95rem; font-weight: 700; color: var(--text-1); margin-bottom: .4rem; }
+    .value-card p { font-size: .82rem; color: var(--text-3); line-height: 1.65; }
+
+    /* ── TEAM ── */
+    #team { background: var(--bg-surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .team-leader { background: linear-gradient(135deg, rgba(59,130,246,.12), rgba(6,182,212,.08)); border: 1px solid rgba(59,130,246,.2); border-radius: var(--radius-lg); padding: 2rem; margin-bottom: 3rem; display: flex; align-items: center; gap: 2rem; }
+    .leader-avatar { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, var(--blue), var(--cyan)); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.5rem; color: var(--text-1); flex-shrink: 0; box-shadow: 0 4px 20px rgba(59,130,246,.35); }
+    .leader-info h3 { font-size: 1.15rem; font-weight: 800; color: var(--text-1); margin-bottom: .2rem; }
+    .leader-info .role { font-size: .85rem; font-weight: 600; color: var(--cyan); margin-bottom: .5rem; }
+    .leader-info p { font-size: .88rem; color: var(--text-2); line-height: 1.7; }
+    .dept-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
+    .dept-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius-md); padding: 1.75rem;
+      transition: background var(--transition), border-color var(--transition), transform var(--transition);
+      position: relative; overflow: hidden;
+    }
+    .dept-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--blue), var(--cyan)); opacity: 0; transition: opacity var(--transition); }
+    .dept-card:hover { background: var(--bg-card-hov); border-color: rgba(59,130,246,.3); transform: translateY(-4px); }
+    .dept-card:hover::before { opacity: 1; }
+    .dept-icon { width: 44px; height: 44px; border-radius: var(--radius-sm); background: rgba(59,130,246,.12); border: 1px solid rgba(59,130,246,.2); display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; }
+    .dept-icon svg { width: 22px; height: 22px; stroke: var(--blue); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .dept-card h4 { font-size: 1rem; font-weight: 700; color: var(--text-1); margin-bottom: .5rem; }
+    .dept-card p { font-size: .875rem; color: var(--text-2); line-height: 1.7; margin-bottom: 1rem; }
+    .skill-pills { display: flex; flex-wrap: wrap; gap: .4rem; }
+    .skill-pill { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08); color: var(--text-3); font-size: .7rem; font-weight: 600; padding: .2rem .6rem; border-radius: 4px; }
+
+    /* ── SERVICES ── */
+    #services { background: var(--bg-base); border-top: 1px solid var(--border); }
+    .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.25rem; }
+    .service-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius-md); padding: 2rem;
+      transition: background var(--transition), border-color var(--transition), transform var(--transition), box-shadow var(--transition);
+      position: relative; overflow: hidden;
+    }
+    .service-card::after { content: ''; position: absolute; inset: -1px; border-radius: var(--radius-md); background: linear-gradient(135deg, var(--blue), var(--cyan)); opacity: 0; z-index: -1; transition: opacity var(--transition); }
+    .service-card:hover { background: var(--bg-card-hov); border-color: transparent; transform: translateY(-4px); box-shadow: 0 12px 40px rgba(59,130,246,.2); }
+    .service-card:hover::after { opacity: .15; }
+    .service-icon-wrap { width: 52px; height: 52px; border-radius: var(--radius-sm); background: linear-gradient(135deg, rgba(59,130,246,.2), rgba(6,182,212,.15)); border: 1px solid rgba(59,130,246,.2); display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem; }
+    .service-icon-wrap svg { width: 26px; height: 26px; stroke: var(--cyan); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .service-card h3 { font-size: 1rem; font-weight: 700; color: var(--text-1); margin-bottom: .6rem; }
+    .service-card p { font-size: .875rem; color: var(--text-2); line-height: 1.7; }
+    .tech-tags { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: 1rem; }
+    .tech-tag { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08); color: var(--text-3); font-size: .72rem; font-weight: 600; padding: .2rem .6rem; border-radius: 4px; }
+
+    /* ── PRODUCTS ── */
+    #products { background: var(--bg-surface); border-top: 1px solid var(--border); }
+    .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem; }
+    .product-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 2rem; display: flex; flex-direction: column; gap: .75rem; transition: background var(--transition), border-color var(--transition), transform var(--transition); }
+    .product-card:hover { background: var(--bg-card-hov); border-color: rgba(245,158,11,.3); transform: translateY(-4px); box-shadow: 0 12px 40px rgba(245,158,11,.1); }
+    .product-emoji { font-size: 2.2rem; }
+    .product-card h3 { font-size: 1rem; font-weight: 700; color: var(--text-1); }
+    .product-card p { font-size: .875rem; color: var(--text-2); line-height: 1.7; }
+    .product-tag { display: inline-block; margin-top: auto; background: rgba(245,158,11,.1); border: 1px solid rgba(245,158,11,.2); color: var(--amber); font-size: .72rem; font-weight: 700; padding: .25rem .7rem; border-radius: 50px; }
+
+    /* ── CLIENTS ── */
+    #clients { background: var(--bg-base); border-top: 1px solid var(--border); }
+    .clients-logos { display: flex; flex-wrap: wrap; gap: .75rem; margin-bottom: 3rem; }
+    .client-chip { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-2); font-size: .9rem; font-weight: 600; padding: .6rem 1.3rem; border-radius: var(--radius-sm); transition: border-color var(--transition), color var(--transition), background var(--transition); }
+    .client-chip:hover { border-color: var(--blue); color: var(--text-1); background: rgba(59,130,246,.08); }
+    .testimonials-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+    .testimonial { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.75rem; position: relative; transition: border-color var(--transition), transform var(--transition); }
+    .testimonial:hover { border-color: rgba(59,130,246,.3); transform: translateY(-2px); }
+    .stars { display: flex; gap: 2px; margin-bottom: 1rem; }
+    .star { color: var(--amber); font-size: .9rem; }
+    .quote-mark { font-size: 3rem; line-height: 1; color: var(--blue); opacity: .3; position: absolute; top: 1rem; right: 1.5rem; font-family: Georgia, serif; pointer-events: none; }
+    .testimonial blockquote { font-size: .92rem; color: var(--text-2); line-height: 1.8; font-style: italic; margin-bottom: 1.25rem; }
+    .testimonial-author { display: flex; align-items: center; gap: .75rem; }
+    .author-avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, var(--blue), var(--cyan)); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: .85rem; color: var(--text-1); flex-shrink: 0; }
+    .author-name { font-size: .85rem; font-weight: 600; color: var(--text-1); }
+    .author-co { font-size: .78rem; color: var(--text-3); }
+    .partners-row { margin-top: 3.5rem; padding-top: 2rem; border-top: 1px solid var(--border); }
+    .partners-label { font-size: .72rem; color: var(--text-3); text-transform: uppercase; letter-spacing: 2px; font-weight: 600; margin-bottom: 1rem; }
+    .partners-chips { display: flex; flex-wrap: wrap; gap: .6rem; }
+    .partner-chip { background: rgba(255,255,255,.03); border: 1px solid var(--border); color: var(--text-3); font-size: .8rem; font-weight: 600; padding: .3rem .9rem; border-radius: var(--radius-sm); transition: color var(--transition), border-color var(--transition); }
+    .partner-chip:hover { color: var(--text-2); border-color: rgba(255,255,255,.18); }
+
+    /* ── CTA BANNER ── */
+    #cta-banner { background: linear-gradient(135deg, rgba(59,130,246,.15) 0%, rgba(6,182,212,.08) 100%); border-top: 1px solid rgba(59,130,246,.2); border-bottom: 1px solid rgba(59,130,246,.2); text-align: center; padding: 90px 5%; position: relative; overflow: hidden; }
+    #cta-banner::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 50%, rgba(59,130,246,.1) 0%, transparent 70%); }
+    #cta-banner h2 { font-size: clamp(1.8rem, 3.5vw, 2.5rem); font-weight: 800; line-height: 1.2; margin-bottom: 1rem; position: relative; }
+    #cta-banner p { font-size: 1rem; color: var(--text-2); max-width: 520px; margin: 0 auto 2rem; position: relative; }
+    #cta-banner .btn-primary { position: relative; }
+
+    /* ── CONTACT ── */
+    #contact { background: var(--bg-surface); border-top: 1px solid var(--border); }
+    .contact-grid { display: grid; grid-template-columns: 1fr 1.3fr; gap: 4rem; align-items: start; }
+    .contact-info-row { display: flex; align-items: flex-start; gap: .9rem; margin-bottom: 1.4rem; }
+    .contact-icon-wrap { width: 42px; height: 42px; flex-shrink: 0; border-radius: var(--radius-sm); background: rgba(59,130,246,.1); border: 1px solid rgba(59,130,246,.2); display: flex; align-items: center; justify-content: center; }
+    .contact-icon-wrap svg { width: 18px; height: 18px; stroke: var(--blue); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .contact-info-row p.info-label { font-size: .78rem; color: var(--text-3); margin-bottom: .15rem; font-weight: 500; }
+    .contact-info-row a { font-size: .92rem; font-weight: 600; color: var(--text-1); transition: color var(--transition); }
+    .contact-info-row a:hover { color: var(--blue); }
+    .social-row-label { font-size: .72rem; color: var(--text-3); text-transform: uppercase; letter-spacing: 2px; font-weight: 600; margin-bottom: .75rem; margin-top: 2rem; }
+    .social-buttons { display: flex; flex-wrap: wrap; gap: .6rem; }
+    .social-btn {
+      display: inline-flex; align-items: center; gap: .5rem;
+      background: var(--bg-card); border: 1px solid var(--border);
+      color: var(--text-2); font-size: .82rem; font-weight: 600;
+      padding: .5rem 1rem; border-radius: var(--radius-sm);
+      transition: all var(--transition);
+    }
+    .social-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .social-btn.linkedin:hover { background: #0A66C2; border-color: #0A66C2; color: var(--text-1); }
+    .social-btn.facebook:hover { background: #1877F2; border-color: #1877F2; color: var(--text-1); }
+    .social-btn.instagram:hover { background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); border-color: transparent; color: var(--text-1); }
+    .social-btn.tiktok:hover { background: #000; border-color: #69C9D0; color: var(--text-1); }
+    .form-box { background: var(--bg-base); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 2.25rem; }
+    .form-box h3 { font-size: 1.05rem; font-weight: 700; color: var(--text-1); margin-bottom: 1.5rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { display: block; font-size: .78rem; font-weight: 600; color: var(--text-2); margin-bottom: .4rem; }
+    .form-group input, .form-group textarea, .form-group select { width: 100%; padding: .7rem 1rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: .875rem; font-family: inherit; color: var(--text-1); transition: border-color var(--transition), box-shadow var(--transition); }
+    .form-group input::placeholder, .form-group textarea::placeholder { color: var(--text-3); }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(59,130,246,.12); }
+    .form-group select { cursor: pointer; }
+    .form-group select option { background: var(--bg-surface); color: var(--text-1); }
+    .form-group textarea { resize: vertical; min-height: 110px; }
+    .btn-submit { width: 100%; display: flex; align-items: center; justify-content: center; gap: .5rem; background: linear-gradient(135deg, var(--blue), var(--blue-dk)); color: var(--text-1); border: none; cursor: pointer; padding: .85rem; border-radius: var(--radius-sm); font-size: .95rem; font-weight: 700; font-family: inherit; transition: transform var(--transition), box-shadow var(--transition); box-shadow: 0 4px 20px rgba(59,130,246,.3); }
+    .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(59,130,246,.45); }
+
+    /* ── FOOTER ── */
+    footer { background: #030712; border-top: 1px solid var(--border); padding: 4rem 5% 2rem; }
+    .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 3rem; margin-bottom: 3rem; }
+    .footer-brand .footer-logo { font-size: 1.3rem; font-weight: 800; color: var(--text-1); margin-bottom: .5rem; }
+    .footer-brand .footer-logo span { background: linear-gradient(135deg, var(--blue), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .footer-brand p { font-size: .85rem; color: var(--text-3); line-height: 1.7; max-width: 240px; margin-bottom: 1.25rem; }
+    .footer-social { display: flex; gap: .5rem; }
+    .footer-social-btn { width: 34px; height: 34px; border-radius: var(--radius-sm); background: var(--bg-card); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; transition: all var(--transition); }
+    .footer-social-btn svg { width: 15px; height: 15px; stroke: var(--text-3); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: stroke var(--transition); }
+    .footer-social-btn:hover { background: var(--blue); border-color: var(--blue); }
+    .footer-social-btn:hover svg { stroke: var(--text-1); }
+    .footer-col h4 { font-size: .8rem; font-weight: 700; color: var(--text-1); letter-spacing: .5px; text-transform: uppercase; margin-bottom: 1rem; }
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: .6rem; }
+    .footer-col ul a { font-size: .85rem; color: var(--text-3); transition: color var(--transition); }
+    .footer-col ul a:hover { color: var(--text-1); }
+    .footer-bottom { border-top: 1px solid var(--border); padding-top: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+    .footer-bottom p { font-size: .78rem; color: var(--text-3); }
+    .footer-bottom a { color: var(--blue); }
+
+    /* ── WHATSAPP FAB ── */
+    .whatsapp-fab {
+      position: fixed; bottom: 2rem; right: 2rem; z-index: 200;
+      width: 56px; height: 56px; border-radius: 50%;
+      background: #25D366;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 20px rgba(37,211,102,.4);
+      transition: transform var(--transition), box-shadow var(--transition);
+    }
+    .whatsapp-fab:hover { transform: scale(1.1) translateY(-2px); box-shadow: 0 8px 32px rgba(37,211,102,.55); }
+    .whatsapp-fab svg { width: 28px; height: 28px; fill: #fff; }
+    .whatsapp-fab::before { content: ''; position: absolute; inset: -6px; border-radius: 50%; border: 2px solid rgba(37,211,102,.3); animation: waPing 2s ease-in-out infinite; }
+    @keyframes waPing { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.2); opacity: 0; } }
+
+    /* ── DIVIDER ── */
+    .divider { height: 1px; background: var(--border); margin: 0 5%; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1024px) {
+      .footer-grid { grid-template-columns: 1fr 1fr; gap: 2rem; }
+      .dept-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 900px) {
+      .about-grid, .contact-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+      .testimonials-grid { grid-template-columns: 1fr; }
+      .values-grid { grid-template-columns: repeat(2, 1fr); }
+      .dept-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      .nav-center, .lang-toggle { display: none; }
+      .nav-cta { display: none; }
+      .hamburger { display: flex; }
+      .form-row { grid-template-columns: 1fr; }
+      .stat { border-right: none; border-bottom: 1px solid var(--border); padding: 1rem; }
+      .stat:last-child { border-bottom: none; }
+      .stats-inner { flex-direction: column; gap: 0; }
+      section { padding: 64px 0; }
+      .values-grid { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr; gap: 2rem; }
+      .hero-trust { flex-direction: column; align-items: flex-start; gap: .75rem; }
+      .team-leader { flex-direction: column; text-align: center; }
+      .whatsapp-fab { bottom: 1.5rem; right: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+
+<!-- ═══ NAV ═══ -->
+<nav id="navbar">
+  <a class="nav-logo" href="#hero">Ted<span>regal</span></a>
+  <ul class="nav-center">
+    <li><a href="#about"    data-es="Nosotros"   data-en="About">Nosotros</a></li>
+    <li><a href="#team"     data-es="Equipo"      data-en="Team">Equipo</a></li>
+    <li><a href="#services" data-es="Servicios"   data-en="Services">Servicios</a></li>
+    <li><a href="#clients"  data-es="Clientes"    data-en="Clients">Clientes</a></li>
+    <li><a href="#contact"  data-es="Contacto"    data-en="Contact">Contacto</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="lang-toggle" id="langBtn">EN</button>
+    <a class="nav-cta" href="#contact" data-es="Hablemos" data-en="Contact us">Hablemos</a>
+    <button class="hamburger" id="hamburger" aria-label="Menú">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <ul>
+    <li><a href="#about"    data-es="Nosotros"  data-en="About">Nosotros</a></li>
+    <li><a href="#team"     data-es="Equipo"    data-en="Team">Equipo</a></li>
+    <li><a href="#services" data-es="Servicios" data-en="Services">Servicios</a></li>
+    <li><a href="#clients"  data-es="Clientes"  data-en="Clients">Clientes</a></li>
+    <li><a href="#contact"  data-es="Contacto"  data-en="Contact">Contacto</a></li>
+  </ul>
+  <a class="mobile-cta" href="#contact" data-es="Hablemos de tu proyecto" data-en="Contact us">Hablemos de tu proyecto</a>
+</div>
+
+<!-- ═══ HERO ═══ -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="dot"></span>
+        <span id="typewriter" class="typewriter">Brings ideas into realities.</span>
+      </div>
+      <h1 data-es='Transformamos tus ideas en <span class="gradient-text">realidades tecnológicas</span> de alto impacto.'
+          data-en='We transform your ideas into <span class="gradient-text">high-impact tech</span> solutions.'>
+        Transformamos tus ideas en <span class="gradient-text">realidades tecnológicas</span> de alto impacto.
+      </h1>
+      <p class="hero-sub"
+         data-es="Impulsamos tu crecimiento mediante desarrollo de software a medida, automatización inteligente (QA) y arquitecturas robustas en la nube (AWS, GCP). Soluciones de alta calidad y fácil uso para escalar tu negocio."
+         data-en="We drive your growth through custom software development, intelligent QA automation, and robust cloud architectures (AWS, GCP). High-quality, easy-to-use solutions to scale your business.">
+        Impulsamos tu crecimiento mediante desarrollo de software a medida, automatización inteligente (QA) y arquitecturas robustas en la nube (AWS, GCP). Soluciones de alta calidad y fácil uso para escalar tu negocio.
+      </p>
+      <div class="hero-btns">
+        <a class="btn-primary" href="#contact" data-es="Hablemos de tu proyecto →" data-en="Talk about your project →">
+          Hablemos de tu proyecto →
+        </a>
+        <a class="btn-secondary" href="#contact" data-es="Solicita una prueba gratuita" data-en="Request a free trial">
+          Solicita una prueba gratuita
+        </a>
+      </div>
+      <div class="hero-trust">
+        <span class="hero-trust-label" data-es="Clientes que confían en nosotros" data-en="Trusted by">Clientes que confían</span>
+        <div class="trust-chips">
+          <span class="trust-chip">Acres SAFI</span>
+          <span class="trust-chip">Acres SAB</span>
+          <span class="trust-chip">Pradera Technologies</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <span data-es="Scroll" data-en="Scroll">Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- ═══ STATS ═══ -->
+<div id="stats">
+  <div class="stats-inner">
+    <div class="stat reveal">
+      <div class="stat-num" data-target="5">0</div>
+      <div class="stat-lbl" data-es="Años de experiencia" data-en="Years of experience">Años de experiencia</div>
+    </div>
+    <div class="stat reveal reveal-delay-1">
+      <div class="stat-num" data-target="4">0</div>
+      <div class="stat-lbl" data-es="Clientes corporativos" data-en="Corporate clients">Clientes corporativos</div>
+    </div>
+    <div class="stat reveal reveal-delay-2">
+      <div class="stat-num" data-target="3">0</div>
+      <div class="stat-lbl" data-es="Productos propios" data-en="Proprietary products">Productos propios</div>
+    </div>
+    <div class="stat reveal reveal-delay-3">
+      <div class="stat-num">AWS</div>
+      <div class="stat-lbl" data-es="Cloud Partner" data-en="Cloud Partner">Cloud Partner</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ABOUT ═══ -->
+<section id="about">
+  <div class="container">
+    <p class="label" data-es="Quiénes somos" data-en="About us">Quiénes somos</p>
+    <h2 class="h2 reveal"
+        data-es='Más que código, construimos el <span class="gradient-text">futuro tecnológico</span> de la región.'
+        data-en='More than code, we build the <span class="gradient-text">technological future</span> of the region.'>
+      Más que código, construimos el <span class="gradient-text">futuro tecnológico</span> de la región.
+    </h2>
+    <p class="section-sub reveal"
+       data-es="Nacimos en 2020 con un propósito social: impulsar talento universitario hacia proyectos tecnológicos de clase mundial."
+       data-en="Born in 2020 with a social mission: channeling university talent toward world-class technology projects.">
+      Nacimos en 2020 con un propósito social: impulsar talento universitario hacia proyectos tecnológicos de clase mundial.
+    </p>
+
+    <div class="about-grid">
+      <div>
+        <p class="about-text reveal"
+           data-es="<strong>Tedregal EIRL</strong> nació el 1 de marzo de 2020 en la ciudad de Piura y hoy opera con su sede principal en Lima, distrito de Breña."
+           data-en="<strong>Tedregal EIRL</strong> was founded on March 1, 2020 in Piura and today operates from its main headquarters in Lima, Breña district.">
+          <strong>Tedregal EIRL</strong> nació el 1 de marzo de 2020 en la ciudad de Piura y hoy opera con su sede principal en Lima, distrito de Breña.
+        </p>
+        <p class="about-text reveal"
+           data-es="Comenzamos como una <strong>start-up innovadora</strong> con un propósito social profundo: fomentar el crecimiento y desarrollo profesional de jóvenes universitarios. A través de retos técnicos reales y tecnologías de vanguardia, consolidamos un equipo de alto rendimiento que hoy atiende clientes corporativos de primer nivel."
+           data-en="We started as an <strong>innovative start-up</strong> with a deep social purpose: fostering the professional growth of university students. Through real technical challenges and cutting-edge technology, we built a high-performance team that now serves top corporate clients.">
+          Comenzamos como una <strong>start-up innovadora</strong> con un propósito social profundo: fomentar el crecimiento y desarrollo profesional de jóvenes universitarios. A través de retos técnicos reales y tecnologías de vanguardia, consolidamos un equipo de alto rendimiento que hoy atiende clientes corporativos de primer nivel.
+        </p>
+        <p class="about-text reveal"
+           data-es="Liderados por nuestro CEO y fundador, <strong>Ing. Max Leo Junior Macalupú Masias</strong>, operamos bajo metodologías ágiles (Scrum, Kanban) con un foco constante en la calidad y el impacto real."
+           data-en="Led by our CEO and founder, <strong>Ing. Max Leo Junior Macalupú Masias</strong>, we operate under agile methodologies (Scrum, Kanban) with a constant focus on quality and real-world impact.">
+          Liderados por nuestro CEO y fundador, <strong>Ing. Max Leo Junior Macalupú Masias</strong>, operamos bajo metodologías ágiles (Scrum, Kanban) con un foco constante en la calidad y el impacto real.
+        </p>
+        <div class="badges reveal">
+          <span class="badge" data-es="Motivación" data-en="Motivation">Motivación</span>
+          <span class="badge" data-es="Trabajo en equipo" data-en="Teamwork">Trabajo en equipo</span>
+          <span class="badge" data-es="Aprendizaje continuo" data-en="Continuous learning">Aprendizaje continuo</span>
+          <span class="badge">Scrum</span>
+          <span class="badge">Kanban</span>
+        </div>
+      </div>
+      <div>
+        <div class="pillar reveal">
+          <div class="pillar-head"><div class="pillar-icon"></div><h3 data-es="Nuestra Visión" data-en="Our Vision">Nuestra Visión</h3></div>
+          <p data-es="Ser una consultora referente en la región, proporcionando conocimiento tecnológico integral para crear proyectos de gran impacto social y empresarial."
+             data-en="To be the region's benchmark consultancy, providing comprehensive technological knowledge to create projects with major social and business impact.">
+            Ser una consultora referente en la región, proporcionando conocimiento tecnológico integral para crear proyectos de gran impacto social y empresarial.
+          </p>
+        </div>
+        <div class="pillar reveal reveal-delay-1">
+          <div class="pillar-head"><div class="pillar-icon"></div><h3 data-es="Nuestra Misión" data-en="Our Mission">Nuestra Misión</h3></div>
+          <p data-es="Desarrollar e implementar productos informáticos de impacto, ofreciendo consultoría tecnológica de alta calidad a instituciones públicas y privadas a nivel global."
+             data-en="To develop and implement high-impact software products, providing top-quality technology consulting to public and private institutions worldwide.">
+            Desarrollar e implementar productos informáticos de impacto, ofreciendo consultoría tecnológica de alta calidad a instituciones públicas y privadas a nivel global.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Values -->
+    <div class="values-header reveal">
+      <h3 data-es="Nuestros Valores" data-en="Our Values">Nuestros Valores</h3>
+      <p data-es="Los principios que guían cada decisión y cada línea de código que escribimos."
+         data-en="The principles that guide every decision and every line of code we write.">
+        Los principios que guían cada decisión y cada línea de código que escribimos.
+      </p>
+    </div>
+    <div class="values-grid">
+      <div class="value-card reveal">
+        <div class="value-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 1 7 7c0 4-3 6-3 9H8c0-3-3-5-3-9a7 7 0 0 1 7-7z"/><path d="M9 21h6"/><path d="M9.5 17.5h5"/></svg>
+        </div>
+        <h4 data-es="Innovación" data-en="Innovation">Innovación</h4>
+        <p data-es="Exploramos tecnologías de vanguardia para dar soluciones que marcan la diferencia."
+           data-en="We explore cutting-edge technologies to deliver solutions that make a difference.">
+          Exploramos tecnologías de vanguardia para dar soluciones que marcan la diferencia.
+        </p>
+      </div>
+      <div class="value-card reveal reveal-delay-1">
+        <div class="value-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <h4 data-es="Calidad" data-en="Quality">Calidad</h4>
+        <p data-es="Cada entregable pasa por estándares rigurosos. No dejamos margen al error."
+           data-en="Every deliverable meets rigorous standards. We leave no room for error.">
+          Cada entregable pasa por estándares rigurosos. No dejamos margen al error.
+        </p>
+      </div>
+      <div class="value-card reveal reveal-delay-2">
+        <div class="value-icon">
+          <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <h4 data-es="Trabajo en equipo" data-en="Teamwork">Trabajo en equipo</h4>
+        <p data-es="Cada área de Tedregal trabaja en sincronía para entregar resultados excepcionales."
+           data-en="Every Tedregal area works in sync to deliver exceptional results.">
+          Cada área de Tedregal trabaja en sincronía para entregar resultados excepcionales.
+        </p>
+      </div>
+      <div class="value-card reveal reveal-delay-3">
+        <div class="value-icon">
+          <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        </div>
+        <h4 data-es="Aprendizaje continuo" data-en="Continuous learning">Aprendizaje continuo</h4>
+        <p data-es="Nos capacitamos constantemente para estar siempre a la vanguardia tecnológica."
+           data-en="We train constantly to remain at the forefront of technology.">
+          Nos capacitamos constantemente para estar siempre a la vanguardia tecnológica.
+        </p>
+      </div>
+      <div class="value-card reveal reveal-delay-4">
+        <div class="value-icon">
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
+        <h4 data-es="Motivación" data-en="Motivation">Motivación</h4>
+        <p data-es="Cada proyecto es una oportunidad de superación personal y profesional de nuestro equipo."
+           data-en="Every project is an opportunity for our team's personal and professional growth.">
+          Cada proyecto es una oportunidad de superación personal y profesional de nuestro equipo.
+        </p>
+      </div>
+      <div class="value-card reveal reveal-delay-5">
+        <div class="value-icon">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        </div>
+        <h4 data-es="Impacto social" data-en="Social impact">Impacto social</h4>
+        <p data-es="Nuestro origen impulsa el talento joven. Tecnología con propósito humano."
+           data-en="Our roots drive young talent. Technology with human purpose.">
+          Nuestro origen impulsa el talento joven. Tecnología con propósito humano.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══ TEAM ═══ -->
+<section id="team">
+  <div class="container">
+    <p class="label" data-es="Nuestro Equipo" data-en="Our Team">Nuestro Equipo</p>
+    <h2 class="h2 reveal"
+        data-es='El equipo detrás de cada <span class="gradient-text">solución de impacto.</span>'
+        data-en='The team behind every <span class="gradient-text">impactful solution.</span>'>
+      El equipo detrás de cada <span class="gradient-text">solución de impacto.</span>
+    </h2>
+    <p class="section-sub reveal"
+       data-es="Un equipo multidisciplinario comprometido con la excelencia técnica, el aprendizaje constante y el trabajo colaborativo."
+       data-en="A multidisciplinary team committed to technical excellence, continuous learning, and collaborative work.">
+      Un equipo multidisciplinario comprometido con la excelencia técnica, el aprendizaje constante y el trabajo colaborativo.
+    </p>
+
+    <!-- CEO -->
+    <div class="team-leader reveal">
+      <div class="leader-avatar">ML</div>
+      <div class="leader-info">
+        <h3>Ing. Max Leo Junior Macalupú Masias</h3>
+        <p class="role" data-es="CEO &amp; Fundador" data-en="CEO &amp; Founder">CEO &amp; Fundador</p>
+        <p data-es="Ingeniero visionario con pasión por la tecnología y el impacto social. Fundó Tedregal en 2020 con la misión de transformar el ecosistema tecnológico regional, impulsando el talento joven hacia proyectos de clase mundial. Lidera el equipo con metodologías ágiles y una filosofía de mejora continua."
+           data-en="Visionary engineer with a passion for technology and social impact. Founded Tedregal in 2020 with the mission to transform the regional technology ecosystem, channeling young talent toward world-class projects. Leads the team with agile methodologies and a continuous improvement philosophy.">
+          Ingeniero visionario con pasión por la tecnología y el impacto social. Fundó Tedregal en 2020 con la misión de transformar el ecosistema tecnológico regional, impulsando el talento joven hacia proyectos de clase mundial. Lidera el equipo con metodologías ágiles y una filosofía de mejora continua.
+        </p>
+      </div>
+    </div>
+
+    <!-- Departments -->
+    <div class="dept-grid">
+      <div class="dept-card reveal">
+        <div class="dept-icon">
+          <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+        <h4 data-es="Gestión TI" data-en="IT Management">Gestión TI</h4>
+        <p data-es="Planificación estratégica, arquitectura de soluciones y coordinación de proyectos. Aseguramos que cada iniciativa esté alineada con los objetivos del negocio y se entregue con la más alta calidad."
+           data-en="Strategic planning, solution architecture, and project coordination. We ensure every initiative aligns with business objectives and is delivered with the highest quality.">
+          Planificación estratégica, arquitectura de soluciones y coordinación de proyectos. Aseguramos que cada iniciativa esté alineada con los objetivos del negocio y se entregue con la más alta calidad.
+        </p>
+        <div class="skill-pills">
+          <span class="skill-pill">Scrum</span>
+          <span class="skill-pill">Kanban</span>
+          <span class="skill-pill" data-es="Gestión de riesgos" data-en="Risk management">Gestión de riesgos</span>
+          <span class="skill-pill">OKRs</span>
+        </div>
+      </div>
+      <div class="dept-card reveal reveal-delay-1">
+        <div class="dept-icon">
+          <svg viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        </div>
+        <h4 data-es="Desarrollo de Software" data-en="Software Development">Desarrollo de Software</h4>
+        <p data-es="Construcción de plataformas digitales robustas y escalables. Desde el diseño UX/UI hasta el despliegue en producción, cubrimos todo el ciclo de vida del software."
+           data-en="Building robust and scalable digital platforms. From UX/UI design to production deployment, we cover the full software lifecycle.">
+          Construcción de plataformas digitales robustas y escalables. Desde el diseño UX/UI hasta el despliegue en producción, cubrimos todo el ciclo de vida del software.
+        </p>
+        <div class="skill-pills">
+          <span class="skill-pill">Java</span>
+          <span class="skill-pill">Angular</span>
+          <span class="skill-pill">Spring Boot</span>
+          <span class="skill-pill">Microservicios</span>
+          <span class="skill-pill">Figma</span>
+        </div>
+      </div>
+      <div class="dept-card reveal reveal-delay-2">
+        <div class="dept-icon">
+          <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <h4 data-es="QA Automation" data-en="QA Automation">QA Automation</h4>
+        <p data-es="Garantizamos que cada sistema funcione a la perfección. Automatizamos pruebas de extremo a extremo, validación de APIs y pruebas de rendimiento para eliminar errores antes de llegar al usuario."
+           data-en="We ensure every system works flawlessly. We automate end-to-end testing, API validation, and performance testing to eliminate errors before they reach the user.">
+          Garantizamos que cada sistema funcione a la perfección. Automatizamos pruebas de extremo a extremo, validación de APIs y pruebas de rendimiento para eliminar errores antes de llegar al usuario.
+        </p>
+        <div class="skill-pills">
+          <span class="skill-pill">Postman</span>
+          <span class="skill-pill">RestAssured</span>
+          <span class="skill-pill">JMeter</span>
+          <span class="skill-pill">Selenium</span>
+        </div>
+      </div>
+      <div class="dept-card reveal reveal-delay-3">
+        <div class="dept-icon">
+          <svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+        </div>
+        <h4 data-es="Contenido Digital" data-en="Digital Content">Contenido Digital</h4>
+        <p data-es="Creación de identidad visual, diseño de interfaces y producción de contenido digital. Comunicamos la propuesta de valor de Tedregal y sus clientes con creatividad y propósito."
+           data-en="Creation of visual identity, interface design, and digital content production. We communicate Tedregal's and its clients' value proposition with creativity and purpose.">
+          Creación de identidad visual, diseño de interfaces y producción de contenido digital. Comunicamos la propuesta de valor de Tedregal y sus clientes con creatividad y propósito.
+        </p>
+        <div class="skill-pills">
+          <span class="skill-pill">Figma</span>
+          <span class="skill-pill">UX/UI</span>
+          <span class="skill-pill" data-es="Diseño gráfico" data-en="Graphic design">Diseño gráfico</span>
+          <span class="skill-pill" data-es="Redes sociales" data-en="Social media">Redes sociales</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SERVICES ═══ -->
+<section id="services">
+  <div class="container">
+    <p class="label" data-es="Qué hacemos" data-en="What we do">Qué hacemos</p>
+    <h2 class="h2 reveal"
+        data-es='Soluciones tecnológicas <span class="gradient-text">integrales y escalables.</span>'
+        data-en='Comprehensive and <span class="gradient-text">scalable tech solutions.</span>'>
+      Soluciones tecnológicas <span class="gradient-text">integrales y escalables.</span>
+    </h2>
+    <p class="section-sub reveal"
+       data-es="Cubrimos todo el ciclo de vida tecnológico de tu empresa, desde el diseño hasta la operación en producción."
+       data-en="We cover your company's full technology lifecycle, from design to production.">
+      Cubrimos todo el ciclo de vida tecnológico de tu empresa, desde el diseño hasta la operación en producción.
+    </p>
+    <div class="services-grid">
+      <div class="service-card reveal">
+        <div class="service-icon-wrap">
+          <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/></svg>
+        </div>
+        <h3 data-es="Desarrollo de Software a Medida" data-en="Custom Software Development">Desarrollo de Software a Medida</h3>
+        <p data-es="Construimos plataformas digitales robustas, seguras y adaptables en arquitecturas de Microservicios. Abarcamos todo el ciclo, desde el diseño UX/UI hasta la integración de pasarelas de pagos complejas."
+           data-en="We build robust, secure, and scalable digital platforms using Microservices architecture. From UX/UI design to complex payment gateway integration.">
+          Construimos plataformas digitales robustas, seguras y adaptables en arquitecturas de Microservicios. Abarcamos todo el ciclo, desde el diseño UX/UI hasta la integración de pasarelas de pagos complejas.
+        </p>
+        <div class="tech-tags">
+          <span class="tech-tag">Java</span>
+          <span class="tech-tag">Angular</span>
+          <span class="tech-tag">Spring Boot</span>
+          <span class="tech-tag">Microservicios</span>
+          <span class="tech-tag">UX/UI</span>
+        </div>
+      </div>
+      <div class="service-card reveal reveal-delay-1">
+        <div class="service-icon-wrap">
+          <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <h3 data-es="Cloud Computing &amp; DevOps" data-en="Cloud Computing &amp; DevOps">Cloud Computing &amp; DevOps</h3>
+        <p data-es="Modernizamos tu infraestructura migrando tus aplicaciones a la nube. Garantizamos alta disponibilidad y despliegues continuos con AWS, GCP y automatización mediante Terraform. Gestionamos tanto Production como Test environments."
+           data-en="We modernize your infrastructure by migrating applications to the cloud. We ensure high availability and continuous deployments with AWS, GCP, and Terraform automation. We manage both Production and Test environments.">
+          Modernizamos tu infraestructura migrando tus aplicaciones a la nube. Garantizamos alta disponibilidad y despliegues continuos con AWS, GCP y automatización mediante Terraform. Gestionamos tanto Production como Test environments.
+        </p>
+        <div class="tech-tags">
+          <span class="tech-tag">AWS</span>
+          <span class="tech-tag">GCP</span>
+          <span class="tech-tag">Terraform</span>
+          <span class="tech-tag">CI/CD</span>
+          <span class="tech-tag">Docker</span>
+        </div>
+      </div>
+      <div class="service-card reveal reveal-delay-2">
+        <div class="service-icon-wrap">
+          <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        </div>
+        <h3 data-es="QA Automation" data-en="QA Automation">QA Automation</h3>
+        <p data-es="No dejamos margen al error. Automatizamos el control de calidad del software con pruebas de rendimiento, validación de APIs y testing de extremo a extremo para asegurar el funcionamiento óptimo de tus sistemas."
+           data-en="We leave no room for error. We automate software quality control with performance testing, API validation, and end-to-end testing to ensure optimal system performance.">
+          No dejamos margen al error. Automatizamos el control de calidad del software con pruebas de rendimiento, validación de APIs y testing de extremo a extremo para asegurar el funcionamiento óptimo de tus sistemas.
+        </p>
+        <div class="tech-tags">
+          <span class="tech-tag">Postman APITest</span>
+          <span class="tech-tag">RestAssured</span>
+          <span class="tech-tag">Apache JMeter</span>
+          <span class="tech-tag">Selenium</span>
+        </div>
+      </div>
+      <div class="service-card reveal reveal-delay-3">
+        <div class="service-icon-wrap">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <h3 data-es="Consultoría Tecnológica" data-en="Tech Consulting">Consultoría Tecnológica</h3>
+        <p data-es="Acompañamos a empresas no tecnológicas en su transformación digital. Definimos e implementamos tu hoja de ruta tecnológica con un diagnóstico preciso, desde la conceptualización hasta producción."
+           data-en="We guide non-tech companies through digital transformation. We define and implement your technology roadmap with a precise diagnosis, from concept to production.">
+          Acompañamos a empresas no tecnológicas en su transformación digital. Definimos e implementamos tu hoja de ruta tecnológica con un diagnóstico preciso, desde la conceptualización hasta producción.
+        </p>
+        <div class="tech-tags">
+          <span class="tech-tag" data-es="Diagnóstico TI" data-en="IT Assessment">Diagnóstico TI</span>
+          <span class="tech-tag" data-es="Hoja de ruta" data-en="Roadmap">Hoja de ruta</span>
+          <span class="tech-tag" data-es="Transformación digital" data-en="Digital transformation">Transformación digital</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PRODUCTS ═══ -->
+<section id="products">
+  <div class="container">
+    <p class="label" data-es="Portafolio" data-en="Portfolio">Portafolio</p>
+    <h2 class="h2 reveal"
+        data-es='Productos propios listos <span class="gradient-text">para el mercado.</span>'
+        data-en='Proprietary products <span class="gradient-text">ready for market.</span>'>
+      Productos propios listos <span class="gradient-text">para el mercado.</span>
+    </h2>
+    <p class="section-sub reveal"
+       data-es="Además de consultoría, desarrollamos herramientas que puedes adoptar directamente en tu empresa desde el primer día."
+       data-en="In addition to consulting, we develop tools you can adopt directly in your company from day one.">
+      Además de consultoría, desarrollamos herramientas que puedes adoptar directamente en tu empresa desde el primer día.
+    </p>
+    <div class="products-grid">
+      <div class="product-card reveal">
+        <div class="product-emoji">📦</div>
+        <h3>K-mper</h3>
+        <p data-es="Plataforma especializada basada en Supply Chain Management para optimizar y visibilizar tu cadena de suministro de punta a punta. Control total de inventarios, logística y proveedores en un solo lugar."
+           data-en="A specialized platform based on Supply Chain Management to optimize and gain full visibility across your supply chain end-to-end. Full control of inventory, logistics, and suppliers in one place.">
+          Plataforma especializada basada en Supply Chain Management para optimizar y visibilizar tu cadena de suministro de punta a punta. Control total de inventarios, logística y proveedores en un solo lugar.
+        </p>
+        <span class="product-tag" data-es="Supply Chain" data-en="Supply Chain">Supply Chain</span>
+      </div>
+      <div class="product-card reveal reveal-delay-1">
+        <div class="product-emoji">🛒</div>
+        <h3 data-es="E-Commerce para Microempresas" data-en="E-Commerce for Micro Businesses">E-Commerce para Microempresas</h3>
+        <p data-es="Soluciones de ventas digitales rápidas y accesibles, pensadas para negocios que quieren vender en línea desde el primer día. Pasarela de pagos, catálogo y gestión de pedidos incluidos."
+           data-en="Fast and affordable digital sales solutions, designed for businesses that want to sell online from day one. Payment gateway, catalog, and order management included.">
+          Soluciones de ventas digitales rápidas y accesibles, pensadas para negocios que quieren vender en línea desde el primer día. Pasarela de pagos, catálogo y gestión de pedidos incluidos.
+        </p>
+        <span class="product-tag" data-es="E-Commerce" data-en="E-Commerce">E-Commerce</span>
+      </div>
+      <div class="product-card reveal reveal-delay-2">
+        <div class="product-emoji">🔗</div>
+        <h3>Blockchain Conecte</h3>
+        <p data-es="Innovación y seguridad en transacciones digitales. Trazabilidad y confianza para tus operaciones más críticas con tecnología blockchain de última generación."
+           data-en="Innovation and security in digital transactions. Traceability and trust for your most critical operations with next-generation blockchain technology.">
+          Innovación y seguridad en transacciones digitales. Trazabilidad y confianza para tus operaciones más críticas con tecnología blockchain de última generación.
+        </p>
+        <span class="product-tag">Blockchain</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══ CLIENTS ═══ -->
+<section id="clients">
+  <div class="container">
+    <p class="label" data-es="Casos de éxito" data-en="Success stories">Casos de éxito</p>
+    <h2 class="h2 reveal"
+        data-es='Impulsando el crecimiento de <span class="gradient-text">empresas líderes.</span>'
+        data-en='Driving growth for <span class="gradient-text">leading companies.</span>'>
+      Impulsando el crecimiento de <span class="gradient-text">empresas líderes.</span>
+    </h2>
+    <p class="section-sub reveal"
+       data-es="Trabajamos con organizaciones que exigen los más altos estándares en cada entregable."
+       data-en="We work with organizations that demand the highest standards in every deliverable.">
+      Trabajamos con organizaciones que exigen los más altos estándares en cada entregable.
+    </p>
+    <div class="clients-logos reveal">
+      <span class="client-chip">Acres SAFI</span>
+      <span class="client-chip">Acres Titulizadora</span>
+      <span class="client-chip">Acres SAB</span>
+      <span class="client-chip">Pradera Technologies</span>
+    </div>
+    <div class="testimonials-grid">
+      <div class="testimonial reveal">
+        <div class="stars">
+          <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+        </div>
+        <div class="quote-mark">"</div>
+        <blockquote
+          data-es='"Tedregal nos ha brindado soporte crítico en la implementación y mantenimiento de nuestras plataformas tecnológicas. Su dominio en el desarrollo de software y aseguramiento de calidad nos permite operar con total tranquilidad en el exigente mercado de capitales."'
+          data-en='"Tedregal has provided critical support in the implementation and maintenance of our technology platforms. Their expertise in software development and QA allows us to operate with complete confidence in the demanding capital markets."'>
+          "Tedregal nos ha brindado soporte crítico en la implementación y mantenimiento de nuestras plataformas tecnológicas. Su dominio en el desarrollo de software y aseguramiento de calidad nos permite operar con total tranquilidad en el exigente mercado de capitales."
+        </blockquote>
+        <div class="testimonial-author">
+          <div class="author-avatar">AS</div>
+          <div>
+            <p class="author-name" data-es="Representante Acres SAFI / SAB" data-en="Acres SAFI / SAB Representative">Representante Acres SAFI / SAB</p>
+            <p class="author-co" data-es="Sector Financiero · Lima, Perú" data-en="Financial Sector · Lima, Peru">Sector Financiero · Lima, Perú</p>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial reveal reveal-delay-1">
+        <div class="stars">
+          <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+        </div>
+        <div class="quote-mark">"</div>
+        <blockquote
+          data-es='"El equipo de Tedregal no solo ejecuta código, sino que aporta innovación constante. Su experiencia en Cloud Computing y automatización ha sido fundamental para escalar nuestras operaciones de manera eficiente y segura."'
+          data-en='"The Tedregal team not only writes code — they bring constant innovation. Their expertise in Cloud Computing and automation has been key to scaling our operations efficiently and securely."'>
+          "El equipo de Tedregal no solo ejecuta código, sino que aporta innovación constante. Su experiencia en Cloud Computing y automatización ha sido fundamental para escalar nuestras operaciones de manera eficiente y segura."
+        </blockquote>
+        <div class="testimonial-author">
+          <div class="author-avatar">PT</div>
+          <div>
+            <p class="author-name" data-es="Representante Pradera Technologies" data-en="Pradera Technologies Representative">Representante Pradera Technologies</p>
+            <p class="author-co" data-es="Sector Tecnología · Lima, Perú" data-en="Technology Sector · Lima, Peru">Sector Tecnología · Lima, Perú</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="partners-row reveal">
+      <p class="partners-label" data-es="Partners tecnológicos" data-en="Technology partners">Partners tecnológicos</p>
+      <div class="partners-chips">
+        <span class="partner-chip">AWS</span>
+        <span class="partner-chip">Google Workspace</span>
+        <span class="partner-chip">Atlassian</span>
+        <span class="partner-chip">Figma</span>
+        <span class="partner-chip">GitLab</span>
+        <span class="partner-chip">Postman</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CTA BANNER ═══ -->
+<section id="cta-banner">
+  <div class="container">
+    <h2 class="reveal"
+        data-es='¿Listo para llevar tu infraestructura <br>tecnológica al <span class="gradient-text">siguiente nivel</span>?'
+        data-en='Ready to take your tech infrastructure <br>to the <span class="gradient-text">next level</span>?'>
+      ¿Listo para llevar tu infraestructura <br>tecnológica al <span class="gradient-text">siguiente nivel</span>?
+    </h2>
+    <p class="reveal"
+       data-es="Agenda una asesoría técnica gratuita y descubre cómo Tedregal puede transformar tu negocio."
+       data-en="Schedule a free technical consultation and discover how Tedregal can transform your business.">
+      Agenda una asesoría técnica gratuita y descubre cómo Tedregal puede transformar tu negocio.
+    </p>
+    <a class="btn-primary reveal" href="#contact"
+       data-es="Contáctanos ahora →"
+       data-en="Contact us now →">Contáctanos ahora →</a>
+  </div>
+</section>
+
+<!-- ═══ CONTACT ═══ -->
+<section id="contact">
+  <div class="container">
+    <p class="label" data-es="Contacto" data-en="Contact">Contacto</p>
+    <h2 class="h2 reveal"
+        data-es='¿Listo para llevar tu tecnología <span class="gradient-text">al siguiente nivel?</span>'
+        data-en='Ready to take your technology <span class="gradient-text">to the next level?</span>'>
+      ¿Listo para llevar tu tecnología <span class="gradient-text">al siguiente nivel?</span>
+    </h2>
+    <p class="section-sub reveal"
+       data-es="Escríbenos para agendar una asesoría técnica o consultar por las pruebas gratuitas de nuestros productos tecnológicos."
+       data-en="Write to us to schedule a technical consultation or ask about free trials of our products.">
+      Escríbenos para agendar una asesoría técnica o consultar por las pruebas gratuitas de nuestros productos tecnológicos.
+    </p>
+    <div class="contact-grid">
+      <div class="reveal">
+        <div class="contact-info-row">
+          <div class="contact-icon-wrap">
+            <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          </div>
+          <div>
+            <p class="info-label" data-es="Dirección" data-en="Address">Dirección</p>
+            <a href="https://maps.google.com/?q=Av+Arica+1271+Breña+Lima" target="_blank" rel="noopener"
+               data-es="Av. Arica Nro. 1271 Dpto. 1410, Breña, Lima, Perú"
+               data-en="Av. Arica Nro. 1271 Dpto. 1410, Breña, Lima, Peru">
+              Av. Arica Nro. 1271 Dpto. 1410, Breña, Lima, Perú
+            </a>
+          </div>
+        </div>
+        <div class="contact-info-row">
+          <div class="contact-icon-wrap">
+            <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.37 2 2 0 0 1 3.59 1h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.77a16 16 0 0 0 6.29 6.29l1.13-.93a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          </div>
+          <div>
+            <p class="info-label" data-es="Teléfono / WhatsApp" data-en="Phone / WhatsApp">Teléfono / WhatsApp</p>
+            <a href="https://wa.me/51946247117" target="_blank" rel="noopener">+51 946 247 117</a>
+          </div>
+        </div>
+        <div class="contact-info-row">
+          <div class="contact-icon-wrap">
+            <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          </div>
+          <div>
+            <p class="info-label" data-es="Correo" data-en="Email">Correo</p>
+            <a href="mailto:info@tedregal.com">info@tedregal.com</a>
+          </div>
+        </div>
+
+        <p class="social-row-label" data-es="Síguenos en redes sociales" data-en="Follow us on social media">Síguenos en redes sociales</p>
+        <div class="social-buttons">
+          <a class="social-btn linkedin" href="#" target="_blank" rel="noopener" aria-label="LinkedIn">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+            <span>LinkedIn</span>
+          </a>
+          <a class="social-btn facebook" href="#" target="_blank" rel="noopener" aria-label="Facebook">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+            <span>Facebook</span>
+          </a>
+          <a class="social-btn instagram" href="#" target="_blank" rel="noopener" aria-label="Instagram">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+            <span>Instagram</span>
+          </a>
+          <a class="social-btn tiktok" href="#" target="_blank" rel="noopener" aria-label="TikTok">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.76a4.85 4.85 0 0 1-1-.07z"/></svg>
+            <span>TikTok</span>
+          </a>
+        </div>
+      </div>
+      <div class="form-box reveal reveal-delay-1">
+        <h3 data-es="Cuéntanos sobre tu proyecto" data-en="Tell us about your project">Cuéntanos sobre tu proyecto</h3>
+        <form id="contactForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="name" data-es="Nombre completo" data-en="Full name">Nombre completo</label>
+              <input type="text" id="name" placeholder="Ej. Juan Pérez" />
+            </div>
+            <div class="form-group">
+              <label for="company" data-es="Empresa" data-en="Company">Empresa</label>
+              <input type="text" id="company" placeholder="Nombre de tu empresa" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="email" data-es="Correo electrónico" data-en="Email">Correo electrónico</label>
+              <input type="email" id="email" placeholder="juan@empresa.com" />
+            </div>
+            <div class="form-group">
+              <label for="phone" data-es="Teléfono" data-en="Phone">Teléfono</label>
+              <input type="tel" id="phone" placeholder="+51 000 000 000" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="service" data-es="Servicio de interés" data-en="Service of interest">Servicio de interés</label>
+            <select id="service">
+              <option value="" data-es="Selecciona un servicio" data-en="Select a service">Selecciona un servicio</option>
+              <option data-es="Desarrollo de Software a Medida" data-en="Custom Software Development">Desarrollo de Software a Medida</option>
+              <option data-es="Cloud Computing &amp; DevOps" data-en="Cloud Computing &amp; DevOps">Cloud Computing &amp; DevOps</option>
+              <option data-es="QA Automation" data-en="QA Automation">QA Automation</option>
+              <option data-es="Consultoría Tecnológica" data-en="Tech Consulting">Consultoría Tecnológica</option>
+              <option data-es="Productos (K-mper / E-Commerce / Blockchain)" data-en="Products (K-mper / E-Commerce / Blockchain)">Productos (K-mper / E-Commerce / Blockchain)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="message" data-es="¿En qué podemos ayudarte?" data-en="How can we help you?">¿En qué podemos ayudarte?</label>
+            <textarea id="message" placeholder="Cuéntanos brevemente tu necesidad o proyecto..."></textarea>
+          </div>
+          <button type="submit" class="btn-submit" data-es="Enviar mensaje →" data-en="Send message →">Enviar mensaje →</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="footer-logo">Ted<span>regal</span></div>
+        <p data-es="Transformamos ideas en realidades tecnológicas de alto impacto para empresas que quieren liderar su sector."
+           data-en="We transform ideas into high-impact tech realities for companies that want to lead their sector.">
+          Transformamos ideas en realidades tecnológicas de alto impacto para empresas que quieren liderar su sector.
+        </p>
+        <div class="footer-social">
+          <a class="footer-social-btn" href="#" target="_blank" rel="noopener" aria-label="LinkedIn">
+            <svg viewBox="0 0 24 24"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+          </a>
+          <a class="footer-social-btn" href="#" target="_blank" rel="noopener" aria-label="Facebook">
+            <svg viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+          </a>
+          <a class="footer-social-btn" href="#" target="_blank" rel="noopener" aria-label="Instagram">
+            <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+          </a>
+          <a class="footer-social-btn" href="#" target="_blank" rel="noopener" aria-label="TikTok">
+            <svg viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.77 0 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.34 6.34 0 0 0-6.13 6.33 6.34 6.34 0 0 0 12.67 0V8.69a8.18 8.18 0 0 0 4.78 1.52V6.76a4.85 4.85 0 0 1-1-.07z"/></svg>
+          </a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4 data-es="Servicios" data-en="Services">Servicios</h4>
+        <ul>
+          <li><a href="#services" data-es="Desarrollo de Software" data-en="Software Development">Desarrollo de Software</a></li>
+          <li><a href="#services" data-es="Cloud &amp; DevOps" data-en="Cloud &amp; DevOps">Cloud &amp; DevOps</a></li>
+          <li><a href="#services" data-es="QA Automation" data-en="QA Automation">QA Automation</a></li>
+          <li><a href="#services" data-es="Consultoría TI" data-en="IT Consulting">Consultoría TI</a></li>
+          <li><a href="#products" data-es="Productos propios" data-en="Proprietary products">Productos propios</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4 data-es="Empresa" data-en="Company">Empresa</h4>
+        <ul>
+          <li><a href="#about" data-es="Nosotros" data-en="About us">Nosotros</a></li>
+          <li><a href="#team" data-es="Equipo" data-en="Team">Equipo</a></li>
+          <li><a href="#clients" data-es="Clientes" data-en="Clients">Clientes</a></li>
+          <li><a href="#about" data-es="Visión &amp; Misión" data-en="Vision &amp; Mission">Visión &amp; Misión</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4 data-es="Contacto" data-en="Contact">Contacto</h4>
+        <ul>
+          <li><a href="mailto:info@tedregal.com">info@tedregal.com</a></li>
+          <li><a href="https://wa.me/51946247117" target="_blank" rel="noopener">+51 946 247 117</a></li>
+          <li><a href="#contact" data-es="Enviar mensaje" data-en="Send a message">Enviar mensaje</a></li>
+          <li><a href="#contact" data-es="Asesoría gratuita" data-en="Free consultation">Asesoría gratuita</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 Tedregal EIRL · Breña, Lima, Perú</p>
+      <p data-es="Hecho con pasión por el equipo Tedregal" data-en="Made with passion by the Tedregal team">Hecho con pasión por el equipo Tedregal</p>
+    </div>
+  </div>
+</footer>
+
+<!-- WhatsApp FAB -->
+<a class="whatsapp-fab" href="https://wa.me/51946247117" target="_blank" rel="noopener" aria-label="WhatsApp">
+  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/>
+  </svg>
+</a>
+
+<script>
+'use strict';
+
+/* ── Progress bar ── */
+const progressBar = document.getElementById('progress-bar');
+window.addEventListener('scroll', () => {
+  const maxScroll = document.body.scrollHeight - window.innerHeight;
+  progressBar.style.width = (window.scrollY / maxScroll * 100) + '%';
+}, { passive: true });
+
+/* ── Sticky nav ── */
+const navbar = document.getElementById('navbar');
+window.addEventListener('scroll', () => {
+  navbar.classList.toggle('scrolled', window.scrollY > 20);
+}, { passive: true });
+
+/* ── Mobile menu ── */
+const hamburger = document.getElementById('hamburger');
+const mobileMenu = document.getElementById('mobileMenu');
+hamburger.addEventListener('click', () => {
+  hamburger.classList.toggle('open');
+  mobileMenu.classList.toggle('open');
+});
+mobileMenu.querySelectorAll('a').forEach(a => {
+  a.addEventListener('click', () => {
+    hamburger.classList.remove('open');
+    mobileMenu.classList.remove('open');
+  });
+});
+
+/* ── Scroll reveal ── */
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      revealObserver.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+/* ── Animated counters ── */
+function animateCounter(el, target, suffix = '') {
+  const duration = 1800;
+  const start = performance.now();
+  const update = (now) => {
+    const progress = Math.min((now - start) / duration, 1);
+    const ease = 1 - Math.pow(1 - progress, 3);
+    el.textContent = Math.round(ease * target) + suffix;
+    if (progress < 1) requestAnimationFrame(update);
+  };
+  requestAnimationFrame(update);
+}
+const counterObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const el = e.target;
+      const target = parseInt(el.dataset.target);
+      if (!isNaN(target)) animateCounter(el, target, '+');
+      counterObserver.unobserve(el);
+    }
+  });
+}, { threshold: 0.5 });
+document.querySelectorAll('[data-target]').forEach(el => counterObserver.observe(el));
+
+/* ── Typewriter ── */
+const typewriterEl = document.getElementById('typewriter');
+const phrases = [
+  'Brings ideas into realities.',
+  'Tecnología que transforma negocios.',
+  'Tu partner de innovación.',
+  'Software de alto impacto.'
+];
+let phraseIdx = 0, charIdx = 0, deleting = false;
+function typeLoop() {
+  const current = phrases[phraseIdx];
+  if (!deleting) {
+    typewriterEl.textContent = current.slice(0, ++charIdx);
+    if (charIdx === current.length) {
+      deleting = true;
+      return setTimeout(typeLoop, 2200);
+    }
+  } else {
+    typewriterEl.textContent = current.slice(0, --charIdx);
+    if (charIdx === 0) {
+      deleting = false;
+      phraseIdx = (phraseIdx + 1) % phrases.length;
+      return setTimeout(typeLoop, 400);
+    }
+  }
+  setTimeout(typeLoop, deleting ? 45 : 75);
+}
+setTimeout(typeLoop, 1000);
+
+/* ── Language toggle ── */
+let currentLang = 'es';
+const langBtn = document.getElementById('langBtn');
+function applyLang(lang) {
+  document.querySelectorAll('[data-' + lang + ']').forEach(el => {
+    const val = el.getAttribute('data-' + lang);
+    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+      el.placeholder = val;
+    } else if (el.tagName === 'OPTION') {
+      el.textContent = val;
+    } else {
+      el.innerHTML = val;
+    }
+  });
+  document.documentElement.lang = lang;
+}
+langBtn.addEventListener('click', () => {
+  currentLang = currentLang === 'es' ? 'en' : 'es';
+  langBtn.textContent = currentLang === 'es' ? 'EN' : 'ES';
+  applyLang(currentLang);
+});
+
+/* ── Smooth scroll ── */
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', (e) => {
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) {
+      e.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      hamburger.classList.remove('open');
+      mobileMenu.classList.remove('open');
+    }
+  });
+});
+
+/* ── Form submit ── */
+document.getElementById('contactForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const btn = e.target.querySelector('.btn-submit');
+  const original = btn.textContent;
+  btn.textContent = currentLang === 'es' ? '¡Enviado! ✓' : 'Sent! ✓';
+  btn.style.background = 'linear-gradient(135deg, #059669, #047857)';
+  setTimeout(() => {
+    btn.textContent = original;
+    btn.style.background = '';
+    e.target.reset();
+  }, 3000);
+});
+</script>
+</body>
+</html>

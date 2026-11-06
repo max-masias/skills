@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MailFlow — Gestión de Envíos</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+:root{
+  --bg:#080d1a;--s1:#0e1525;--s2:#152033;--s3:#1c2a42;
+  --border:#1e2d47;--primary:#4f7cff;--pdim:rgba(79,124,255,.12);
+  --accent:#00d4b4;--adim:rgba(0,212,180,.12);
+  --danger:#ff4f6d;--warn:#ffb347;--success:#4fdb8b;
+  --text:#e2e8f5;--muted:#6b7a99;--dim:#8a9ab8;
+  --r:10px;--rl:16px;--fh:'Syne',sans-serif;--fb:'DM Sans',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--fb);background:var(--bg);color:var(--text);min-height:100vh;display:flex;overflow:hidden}
+
+/* SIDEBAR */
+.sidebar{width:240px;background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:24px 0;flex-shrink:0}
+.logo{padding:0 20px 20px;border-bottom:1px solid var(--border);margin-bottom:12px}
+.logo h1{font-family:var(--fh);font-size:22px;font-weight:800;letter-spacing:-.5px}
+.logo h1 span{color:var(--primary)}
+.logo p{font-size:11px;color:var(--muted);margin-top:2px}
+.nav-sec{padding:8px 12px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin-top:8px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;cursor:pointer;transition:.15s;font-size:14px;color:var(--dim);border-left:3px solid transparent}
+.nav-item:hover{background:var(--s2);color:var(--text)}
+.nav-item.active{background:var(--pdim);color:var(--primary);border-left-color:var(--primary);font-weight:600}
+.nav-item .nb{margin-left:auto;background:var(--primary);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:20px;min-width:18px;text-align:center}
+.sidebar-bottom{margin-top:auto}
+
+/* MAIN */
+.main{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+.topbar{background:var(--s1);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.topbar-title{font-family:var(--fh);font-size:20px;font-weight:700}
+.topbar-actions{display:flex;gap:8px}
+.content{padding:32px;flex:1}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:var(--r);font-family:var(--fb);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:.15s;white-space:nowrap}
+.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:#3d6aee}
+.btn-accent{background:var(--accent);color:#0a1a17}.btn-accent:hover{background:#00b89d}
+.btn-ghost{background:transparent;color:var(--dim);border:1px solid var(--border)}.btn-ghost:hover{background:var(--s2);color:var(--text)}
+.btn-danger{background:var(--danger);color:#fff}.btn-danger:hover{background:#e03058}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-lg{padding:12px 24px;font-size:15px}
+.btn.active{background:var(--pdim);color:var(--primary);border-color:var(--primary)}
+
+/* CARDS */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:var(--rl);padding:24px}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.card-title{font-family:var(--fh);font-size:16px;font-weight:700}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px}
+.stat-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--rl);padding:20px;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.stat-card.blue::before{background:var(--primary)}.stat-card.teal::before{background:var(--accent)}
+.stat-card.green::before{background:var(--success)}.stat-card.orange::before{background:var(--warn)}
+.stat-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px}
+.stat-value{font-family:var(--fh);font-size:32px;font-weight:800;line-height:1}
+.stat-sub{font-size:12px;color:var(--muted);margin-top:6px}
+
+/* TABLE */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{text-align:left;padding:12px 16px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);border-bottom:1px solid var(--border)}
+tbody tr{border-bottom:1px solid var(--border);transition:background .12s}
+tbody tr:hover{background:var(--s2)}
+tbody tr:last-child{border-bottom:none}
+tbody td{padding:14px 16px;color:var(--dim)}
+tbody td:first-child{color:var(--text);font-weight:500}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-blue{background:var(--pdim);color:var(--primary)}
+.badge-teal{background:var(--adim);color:var(--accent)}
+.badge-green{background:rgba(79,219,139,.12);color:var(--success)}
+.badge-orange{background:rgba(255,179,71,.12);color:var(--warn)}
+.badge-red{background:rgba(255,79,109,.12);color:var(--danger)}
+.badge-gray{background:rgba(107,122,153,.15);color:var(--dim)}
+
+/* FORMS */
+.form-group{margin-bottom:20px}
+label{display:block;font-size:12px;font-weight:600;color:var(--dim);margin-bottom:6px;text-transform:uppercase;letter-spacing:.8px}
+input,select,textarea{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;font-family:var(--fb);font-size:14px;color:var(--text);outline:none;transition:border-color .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--primary);background:var(--s3)}
+input::placeholder,textarea::placeholder{color:var(--muted)}
+select option{background:var(--s2)}
+textarea{resize:vertical;min-height:120px}
+.form-row{display:grid;gap:16px}
+.cols-2{grid-template-columns:1fr 1fr}
+.cols-3{grid-template-columns:1fr 1fr 1fr}
+
+/* WIZARD STEPS */
+.wizard-steps{display:flex;align-items:center;margin-bottom:24px;padding:20px 24px;background:var(--s1);border:1px solid var(--border);border-radius:var(--rl);overflow-x:auto;gap:0}
+.wizard-step{display:flex;align-items:center;flex:1;min-width:0}
+.step-circle{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;transition:.2s}
+.step-circle.pending{background:var(--s3);color:var(--muted);border:2px solid var(--border)}
+.step-circle.active{background:var(--primary);color:#fff;box-shadow:0 0 0 4px var(--pdim)}
+.step-circle.done{background:var(--success);color:#0a1a0f}
+.step-info{margin-left:8px;min-width:0;flex:1}
+.step-name{font-size:12px;font-weight:600;color:var(--dim);white-space:nowrap}
+.step-name.active{color:var(--primary)}.step-name.done{color:var(--success)}
+.step-desc{font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.step-conn{flex:0 0 24px;height:2px;background:var(--border);margin:0 2px}
+.step-conn.done{background:var(--success)}
+.wizard-body{background:var(--s1);border:1px solid var(--border);border-radius:var(--rl);padding:32px}
+.wizard-actions{display:flex;justify-content:space-between;align-items:center;margin-top:32px;padding-top:24px;border-top:1px solid var(--border)}
+
+/* PERIOD OPTIONS */
+.period-options{display:flex;gap:12px}
+.period-option{flex:1;background:var(--s2);border:2px solid var(--border);border-radius:var(--r);padding:16px;cursor:pointer;transition:.15s;text-align:center}
+.period-option:hover,.period-option.selected{border-color:var(--primary);background:var(--pdim)}
+.period-icon{font-size:24px;margin-bottom:8px}
+.period-label{font-weight:700;font-size:14px}
+.period-desc{font-size:11px;color:var(--muted);margin-top:3px}
+
+/* TEMPLATE GRID */
+.tpl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.tpl-card{background:var(--s2);border:2px solid var(--border);border-radius:var(--rl);overflow:hidden;cursor:pointer;transition:.2s}
+.tpl-card:hover{border-color:var(--primary);transform:translateY(-2px)}
+.tpl-card.selected{border-color:var(--primary);box-shadow:0 0 0 4px var(--pdim)}
+.tpl-preview{height:130px;background:#fff;overflow:hidden;display:flex;align-items:flex-start;justify-content:flex-start;position:relative}
+.tpl-preview-inner{width:200%;height:200%;transform:scale(.5);transform-origin:top left;pointer-events:none;overflow:hidden}
+.tpl-info{padding:14px}
+.tpl-name{font-weight:600;font-size:13px}
+.tpl-meta{font-size:11px;color:var(--muted);margin-top:4px}
+
+/* TEMPLATE EDITOR */
+.tpl-editor{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.editor-pane{background:var(--s2);border:1px solid var(--border);border-radius:var(--r)}
+.editor-pane-header{padding:10px 14px;border-bottom:1px solid var(--border);font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;justify-content:space-between}
+.editor-ta{width:100%;background:transparent;border:none;padding:14px;font-family:'Courier New',monospace;font-size:12px;color:var(--text);min-height:280px;resize:vertical;outline:none}
+.preview-frame{padding:12px;min-height:280px;background:#fff;border-radius:0 0 var(--r) var(--r);overflow:auto}
+
+/* VAR CHIPS */
+.var-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.var-chip{background:var(--adim);color:var(--accent);border:1px solid rgba(0,212,180,.2);padding:3px 8px;border-radius:4px;font-size:12px;font-family:monospace;cursor:pointer;transition:.15s}
+.var-chip:hover{background:rgba(0,212,180,.2)}
+
+/* MAPPING */
+.map-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.map-row:last-child{border-bottom:none}
+.map-var{flex:0 0 110px;font-family:monospace;font-size:12px;color:var(--accent);background:var(--adim);padding:4px 8px;border-radius:4px}
+.map-arrow{color:var(--muted);flex-shrink:0;font-size:16px}
+.map-select{flex:1;margin:0}
+
+/* EMAIL PREVIEW */
+.email-preview-outer{background:#e8edf5;border-radius:var(--r);padding:24px;min-height:360px}
+.email-envelope{max-width:580px;margin:0 auto;background:#fff;border-radius:8px;box-shadow:0 2px 20px rgba(0,0,0,.15);overflow:hidden}
+.email-meta-bar{background:#f8fafc;padding:14px 18px;border-bottom:1px solid #e2e8f0}
+.email-meta-bar p{font-size:12px;color:#64748b;margin-bottom:3px}
+.email-meta-bar p:last-child{margin:0}
+.email-meta-bar span{color:#1e293b;font-weight:500}
+.email-body{padding:0;min-height:180px;font-size:14px;line-height:1.6}
+
+/* PROGRESS */
+.progress-bar{background:var(--s3);border-radius:4px;height:8px;overflow:hidden;margin-top:6px}
+.progress-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--primary),var(--accent));transition:width .3s ease}
+
+/* SEND ANIMATION */
+@keyframes pulse-ring{0%{transform:scale(.8);opacity:1}100%{transform:scale(2);opacity:0}}
+.pulse-wrap{position:relative;width:80px;height:80px;margin:0 auto 20px}
+.pulse-ring{position:absolute;inset:0;border-radius:50%;border:3px solid var(--primary);animation:pulse-ring 1.5s ease-out infinite}
+.pulse-ring:nth-child(2){animation-delay:.5s}.pulse-ring:nth-child(3){animation-delay:1s}
+.pulse-center{position:absolute;inset:10px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px}
+.send-anim{text-align:center;padding:32px 20px}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(4px)}
+.modal{background:var(--s1);border:1px solid var(--border);border-radius:var(--rl);padding:28px;max-width:820px;width:90%;max-height:88vh;overflow-y:auto;animation:fadeUp .25s ease}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+.modal-title{font-family:var(--fh);font-size:20px;font-weight:700}
+
+/* TOAST */
+.toast-wrap{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:8px;z-index:200}
+.toast{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:11px 15px;font-size:13px;transform:translateX(120px);opacity:0;transition:all .25s cubic-bezier(.16,1,.3,1);display:flex;align-items:center;gap:8px;min-width:230px}
+.toast.show{transform:translateX(0);opacity:1}
+.toast.success{border-left:3px solid var(--success)}.toast.error{border-left:3px solid var(--danger)}.toast.info{border-left:3px solid var(--primary)}
+
+/* TABS */
+.tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:20px}
+.tab{padding:9px 18px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:.15s}
+.tab:hover{color:var(--text)}.tab.active{color:var(--primary);border-bottom-color:var(--primary)}
+
+/* SECTIONS */
+.section{display:none}.section.active{display:block;animation:fadeUp .3s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+/* EMPTY STATE */
+.empty{text-align:center;padding:48px 24px;color:var(--muted)}
+.empty .eicon{font-size:40px;margin-bottom:12px;opacity:.5}
+.empty h3{font-family:var(--fh);font-size:17px;color:var(--dim);margin-bottom:6px}
+.empty p{font-size:13px;margin-bottom:16px}
+
+/* SUMMARY BOX */
+.sum-box{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px}
+.sum-box h4{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:5px}
+.sum-box p{font-size:14px}
+
+/* CHECKBOX ROW */
+.cb-row{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer}
+.cb-row input[type=checkbox]{width:15px;height:15px;accent-color:var(--primary);flex-shrink:0}
+.cb-row:last-child{border-bottom:none}
+
+/* GRID UTILS */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.action-btns{display:flex;gap:6px;justify-content:flex-end}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--s3);border-radius:3px}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <h1>Mail<span>Flow</span></h1>
+    <p>Gestión de Envíos</p>
+  </div>
+  <span class="nav-sec">Principal</span>
+  <div class="nav-item active" onclick="navigate('dashboard')">
+    <i data-lucide="layout-dashboard" style="width:15px;height:15px"></i>Dashboard
+  </div>
+  <span class="nav-sec">Gestión</span>
+  <div class="nav-item" onclick="navigate('envios')">
+    <i data-lucide="send" style="width:15px;height:15px"></i>Envíos
+    <span class="nb" id="nb-envios">0</span>
+  </div>
+  <div class="nav-item" onclick="navigate('plantillas')">
+    <i data-lucide="layout-template" style="width:15px;height:15px"></i>Plantillas
+    <span class="nb" id="nb-plantillas">0</span>
+  </div>
+  <div class="nav-item" onclick="navigate('contactos')">
+    <i data-lucide="users" style="width:15px;height:15px"></i>Contactos
+    <span class="nb" id="nb-contactos">0</span>
+  </div>
+  <div class="sidebar-bottom">
+    <span class="nav-sec">Herramientas</span>
+    <div class="nav-item" onclick="loadDemo()">
+      <i data-lucide="zap" style="width:15px;height:15px"></i>Cargar Demo
+    </div>
+    <div class="nav-item" onclick="clearAll()">
+      <i data-lucide="trash-2" style="width:15px;height:15px"></i>Limpiar datos
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="topbar-title">Dashboard</div>
+    <div class="topbar-actions" id="topbar-actions"></div>
+  </div>
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <section class="section active" id="section-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card blue"><div class="stat-label">Total Envíos</div><div class="stat-value" id="st-envios">0</div><div class="stat-sub">campañas registradas</div></div>
+        <div class="stat-card teal"><div class="stat-label">Plantillas</div><div class="stat-value" id="st-plantillas">0</div><div class="stat-sub">templates disponibles</div></div>
+        <div class="stat-card green"><div class="stat-label">Contactos</div><div class="stat-value" id="st-contactos">0</div><div class="stat-sub">en base de datos</div></div>
+        <div class="stat-card orange"><div class="stat-label">Programados</div><div class="stat-value" id="st-activos">0</div><div class="stat-sub">envíos activos</div></div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header"><h3 class="card-title">Envíos Recientes</h3><button class="btn btn-ghost btn-sm" onclick="navigate('envios')">Ver todos</button></div>
+          <div id="dash-recientes"></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3 class="card-title">Distribución Periodicidad</h3></div>
+          <div style="display:flex;flex-direction:column;gap:14px;margin-top:4px">
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:12px"><span style="color:var(--dim)">Diario</span><span id="pct-d" style="color:var(--primary);font-weight:600">0%</span></div><div class="progress-bar"><div class="progress-fill" id="bar-d" style="width:0%;background:var(--primary)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:12px"><span style="color:var(--dim)">Semanal</span><span id="pct-s" style="color:var(--accent);font-weight:600">0%</span></div><div class="progress-bar"><div class="progress-fill" id="bar-s" style="width:0%;background:var(--accent)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:12px"><span style="color:var(--dim)">Mensual</span><span id="pct-m" style="color:var(--warn);font-weight:600">0%</span></div><div class="progress-bar"><div class="progress-fill" id="bar-m" style="width:0%;background:var(--warn)"></div></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ENVÍOS LIST -->
+    <section class="section" id="section-envios">
+      <div class="card">
+        <div class="card-header"><h3 class="card-title">Todos los Envíos</h3><button class="btn btn-primary btn-sm" onclick="navigate('nuevo-envio')"><i data-lucide="plus" style="width:13px;height:13px"></i>Nuevo Envío</button></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Nombre</th><th>Periodicidad</th><th>Plantilla</th><th>Contactos</th><th>Estado</th><th>Fecha Inicio</th><th>Acciones</th></tr></thead>
+            <tbody id="tbody-envios"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- WIZARD NUEVO ENVÍO -->
+    <section class="section" id="section-nuevo-envio">
+      <div class="wizard-steps" id="wiz-steps"></div>
+      <div class="wizard-body" id="wiz-body"></div>
+    </section>
+
+    <!-- PLANTILLAS LIST -->
+    <section class="section" id="section-plantillas">
+      <div class="card">
+        <div class="card-header"><h3 class="card-title">Plantillas de Correo</h3><button class="btn btn-primary btn-sm" onclick="openTplModal()"><i data-lucide="plus" style="width:13px;height:13px"></i>Nueva Plantilla</button></div>
+        <div class="tpl-grid" id="tpl-grid" style="margin-top:8px"></div>
+      </div>
+    </section>
+
+    <!-- CONTACTOS -->
+    <section class="section" id="section-contactos">
+      <div class="card">
+        <div class="card-header"><h3 class="card-title">Base de Contactos</h3></div>
+        <div class="tabs">
+          <div class="tab active" onclick="ctab('manual')">Agregar Manual</div>
+          <div class="tab" onclick="ctab('csv')">Importar CSV</div>
+          <div class="tab" onclick="ctab('lista')">Lista Completa</div>
+        </div>
+        <div id="ct-manual">
+          <div class="form-row cols-3">
+            <div class="form-group" style="margin:0"><label>Nombre</label><input id="cn-nombre" type="text" placeholder="Juan García"/></div>
+            <div class="form-group" style="margin:0"><label>Email *</label><input id="cn-email" type="email" placeholder="juan@empresa.com"/></div>
+            <div class="form-group" style="margin:0"><label>Empresa</label><input id="cn-empresa" type="text" placeholder="ACME Corp"/></div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:12px">
+            <input id="cn-e1" type="text" placeholder="Campo extra 1" style="flex:1"/>
+            <input id="cn-e2" type="text" placeholder="Campo extra 2" style="flex:1"/>
+            <button class="btn btn-primary" onclick="addContact()"><i data-lucide="plus" style="width:13px;height:13px"></i>Agregar</button>
+          </div>
+        </div>
+        <div id="ct-csv" style="display:none">
+          <label>Pega tu CSV (primera fila = encabezados: nombre, email, empresa...)</label>
+          <textarea id="csv-raw" placeholder="nombre,email,empresa&#10;Juan García,juan@mail.com,ACME&#10;Ana López,ana@mail.com,Beta Corp" style="min-height:140px;font-family:monospace;font-size:12px"></textarea>
+          <div style="display:flex;justify-content:flex-end;margin-top:8px"><button class="btn btn-accent" onclick="importCSV()"><i data-lucide="upload" style="width:13px;height:13px"></i>Importar</button></div>
+        </div>
+        <div id="ct-lista" style="display:none">
+          <div class="table-wrap">
+            <table><thead><tr><th>Nombre</th><th>Email</th><th>Empresa</th><th>Extra 1</th><th>Extra 2</th><th></th></tr></thead>
+            <tbody id="tbody-contactos"></tbody></table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<!-- MODAL PLANTILLA -->
+<div id="modal-tpl" style="display:none" class="modal-overlay" onclick="if(event.target===this)closeTplModal()">
+  <div class="modal" style="max-width:860px">
+    <div class="modal-header">
+      <h2 class="modal-title" id="modal-tpl-title">Nueva Plantilla</h2>
+      <button class="btn btn-ghost btn-sm" onclick="closeTplModal()">✕</button>
+    </div>
+    <div class="form-row cols-2" style="margin-bottom:16px">
+      <div class="form-group" style="margin:0"><label>Nombre de la Plantilla *</label><input id="pt-nombre" type="text" placeholder="Ej: Newsletter Mensual"/></div>
+      <div class="form-group" style="margin:0"><label>Asunto del Correo</label><input id="pt-asunto" type="text" placeholder="Ej: {{nombre}}, tenemos novedades"/></div>
+    </div>
+    <div style="margin-bottom:12px">
+      <label>Variables (click para insertar en el HTML)</label>
+      <div class="var-chips">
+        <span class="var-chip" onclick="insertVar('{{nombre}}')">{{nombre}}</span>
+        <span class="var-chip" onclick="insertVar('{{email}}')">{{email}}</span>
+        <span class="var-chip" onclick="insertVar('{{empresa}}')">{{empresa}}</span>
+        <span class="var-chip" onclick="insertVar('{{extra1}}')">{{extra1}}</span>
+        <span class="var-chip" onclick="insertVar('{{extra2}}')">{{extra2}}</span>
+      </div>
+    </div>
+    <div class="tpl-editor">
+      <div class="editor-pane">
+        <div class="editor-pane-header"><span>HTML del Correo</span><button class="btn btn-ghost btn-sm" onclick="loadDefaultTpl()">Cargar ejemplo</button></div>
+        <textarea class="editor-ta" id="pt-html" placeholder="Escribe el HTML de tu correo aquí..." oninput="updatePreview()"></textarea>
+      </div>
+      <div class="editor-pane">
+        <div class="editor-pane-header">Vista Previa</div>
+        <div class="preview-frame" id="pt-preview"></div>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:18px">
+      <button class="btn btn-ghost" onclick="closeTplModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveTpl()"><i data-lucide="save" style="width:13px;height:13px"></i>Guardar Plantilla</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script>
+// ─── STATE ────────────────────────────────────────────────────────────────────
+const LS = {
+  get:(k,d=[])=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},
+  set:(k,v)=>localStorage.setItem(k,JSON.stringify(v))
+};
+
+const S = {
+  envios:    LS.get('mf_envios',[]),
+  plantillas:LS.get('mf_plantillas',[]),
+  contactos: LS.get('mf_contactos',[])
+};
+
+let WIZ = { step:1, data:{} };
+let editTplIdx = null;
+
+// ─── TOAST ────────────────────────────────────────────────────────────────────
+function toast(msg, type='success'){
+  const c=document.getElementById('toast-wrap');
+  const t=document.createElement('div');
+  const ico={success:'check-circle',error:'x-circle',info:'info'}[type]||'info';
+  t.className=`toast ${type}`;
+  t.innerHTML=`<i data-lucide="${ico}" style="width:14px;height:14px"></i>${msg}`;
+  c.appendChild(t);
+  lucide.createIcons();
+  requestAnimationFrame(()=>t.classList.add('show'));
+  setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),300)},2800);
+}
+
+// ─── NAVIGATION ───────────────────────────────────────────────────────────────
+const TITLES={dashboard:'Dashboard',envios:'Envíos','nuevo-envio':'Nuevo Envío',plantillas:'Plantillas',contactos:'Contactos'};
+
+function navigate(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById(`section-${id}`)?.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
+  const navMap={dashboard:0,envios:1,'nuevo-envio':1,plantillas:2,contactos:3};
+  document.querySelectorAll('.nav-item')[navMap[id]]?.classList.add('active');
+  document.getElementById('topbar-title').textContent=TITLES[id]||id;
+  const acts=document.getElementById('topbar-actions');
+  acts.innerHTML='';
+  if(id==='envios'){acts.innerHTML=`<button class="btn btn-primary btn-sm" onclick="navigate('nuevo-envio')"><i data-lucide="plus" style="width:13px;height:13px"></i>Nuevo Envío</button>`;renderEnvios();}
+  else if(id==='plantillas'){acts.innerHTML=`<button class="btn btn-primary btn-sm" onclick="openTplModal()"><i data-lucide="plus" style="width:13px;height:13px"></i>Nueva Plantilla</button>`;renderTpls();}
+  else if(id==='nuevo-envio'){WIZ={step:1,data:{}};renderWiz();}
+  else if(id==='dashboard') renderDash();
+  else if(id==='contactos') ctab('manual');
+  lucide.createIcons();
+  updateBadges();
+}
+
+function updateBadges(){
+  document.getElementById('nb-envios').textContent=S.envios.length;
+  document.getElementById('nb-plantillas').textContent=S.plantillas.length;
+  document.getElementById('nb-contactos').textContent=S.contactos.length;
+}
+
+// ─── DASHBOARD ────────────────────────────────────────────────────────────────
+function renderDash(){
+  document.getElementById('st-envios').textContent=S.envios.length;
+  document.getElementById('st-plantillas').textContent=S.plantillas.length;
+  document.getElementById('st-contactos').textContent=S.contactos.length;
+  document.getElementById('st-activos').textContent=S.envios.filter(e=>e.status==='Programado'||e.status==='Activo').length;
+  const rec=document.getElementById('dash-recientes');
+  if(!S.envios.length){rec.innerHTML=`<div class="empty"><div class="eicon">📬</div><p>Sin envíos aún</p></div>`;return;}
+  rec.innerHTML=`<div style="display:flex;flex-direction:column;gap:8px">${S.envios.slice(-5).reverse().map(e=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--s2);border-radius:var(--r)">
+      <div><div style="font-weight:500;font-size:13px">${e.nombre}</div><div style="font-size:11px;color:var(--muted);margin-top:2px">${e.periodicidad} · ${e.contactos?.length||0} contactos</div></div>
+      ${statusBadge(e.status)}
+    </div>`).join('')}</div>`;
+  const tot=S.envios.length||1;
+  const d=S.envios.filter(e=>e.periodicidad==='Diario').length;
+  const s=S.envios.filter(e=>e.periodicidad==='Semanal').length;
+  const m=S.envios.filter(e=>e.periodicidad==='Mensual').length;
+  document.getElementById('pct-d').textContent=Math.round(d/tot*100)+'%';
+  document.getElementById('pct-s').textContent=Math.round(s/tot*100)+'%';
+  document.getElementById('pct-m').textContent=Math.round(m/tot*100)+'%';
+  document.getElementById('bar-d').style.width=Math.round(d/tot*100)+'%';
+  document.getElementById('bar-s').style.width=Math.round(s/tot*100)+'%';
+  document.getElementById('bar-m').style.width=Math.round(m/tot*100)+'%';
+}
+
+function statusBadge(s){
+  const m={Borrador:'badge-gray',Programado:'badge-blue',Activo:'badge-green',Pausado:'badge-orange',Enviado:'badge-teal'};
+  return `<span class="badge ${m[s]||'badge-gray'}">${s||'Borrador'}</span>`;
+}
+
+// ─── ENVÍOS LIST ──────────────────────────────────────────────────────────────
+function renderEnvios(){
+  const tb=document.getElementById('tbody-envios');
+  if(!S.envios.length){
+    tb.innerHTML=`<tr><td colspan="7"><div class="empty"><div class="eicon">📤</div><h3>Sin envíos</h3><p>Crea tu primer envío para comenzar</p><button class="btn btn-primary" onclick="navigate('nuevo-envio')">Crear Envío</button></div></td></tr>`;
+    return;
+  }
+  tb.innerHTML=S.envios.map((e,i)=>`<tr>
+    <td>${e.nombre}</td>
+    <td><span class="badge ${e.periodicidad==='Diario'?'badge-blue':e.periodicidad==='Semanal'?'badge-teal':'badge-orange'}">${e.periodicidad}</span></td>
+    <td>${e.plantillaNombre||'—'}</td>
+    <td>${e.contactos?.length||0}</td>
+    <td>${statusBadge(e.status)}</td>
+    <td style="font-size:12px;color:var(--muted)">${e.fechaInicio||'—'}</td>
+    <td><div class="action-btns">
+      <button class="btn btn-ghost btn-sm" onclick="showEnvioDetail(${i})">Ver</button>
+      <button class="btn btn-danger btn-sm" onclick="delEnvio(${i})">Eliminar</button>
+    </div></td>
+  </tr>`).join('');
+}
+
+function delEnvio(i){
+  if(!confirm('¿Eliminar este envío?'))return;
+  S.envios.splice(i,1);LS.set('mf_envios',S.envios);
+  renderEnvios();updateBadges();toast('Envío eliminado','info');
+}
+
+function showEnvioDetail(i){
+  const e=S.envios[i];
+  const ov=document.createElement('div');
+  ov.className='modal-overlay';
+  ov.onclick=ev=>{if(ev.target===ov)ov.remove()};
+  ov.innerHTML=`<div class="modal"><div class="modal-header"><h2 class="modal-title">${e.nombre}</h2><button class="btn btn-ghost btn-sm" onclick="this.closest('.modal-overlay').remove()">✕</button></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="sum-box"><h4>Periodicidad</h4><p>${e.periodicidad}</p></div>
+      <div class="sum-box"><h4>Estado</h4><p>${e.status||'Borrador'}</p></div>
+      <div class="sum-box"><h4>Plantilla</h4><p>${e.plantillaNombre||'—'}</p></div>
+      <div class="sum-box"><h4>Fecha Inicio</h4><p>${e.fechaInicio||'—'}</p></div>
+      <div class="sum-box" style="grid-column:1/-1"><h4>Asunto</h4><p>${e.asunto||'—'}</p></div>
+      <div class="sum-box" style="grid-column:1/-1"><h4>Contactos (${e.contactos?.length||0})</h4>
+        <div style="max-height:110px;overflow-y:auto;margin-top:6px">${(e.contactos||[]).slice(0,12).map(c=>`<div style="font-size:12px;color:var(--dim);padding:2px 0">${c.nombre||'?'} — ${c.email||'?'}</div>`).join('')}${(e.contactos?.length||0)>12?`<div style="font-size:11px;color:var(--muted);margin-top:3px">...y ${e.contactos.length-12} más</div>`:''}</div>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-top:16px"><button class="btn btn-ghost" onclick="this.closest('.modal-overlay').remove()">Cerrar</button></div>
+  </div>`;
+  document.body.appendChild(ov);
+}
+
+// ─── WIZARD ───────────────────────────────────────────────────────────────────
+const STEPS=[
+  {name:'Configuración',desc:'Nombre y periodicidad'},
+  {name:'Recolección',desc:'Datos de destinatarios'},
+  {name:'Plantilla',desc:'Selección de template'},
+  {name:'Preparación',desc:'Mapeo de variables'},
+  {name:'Preliminar',desc:'Vista previa del correo'},
+  {name:'Envío',desc:'Confirmación final'},
+];
+
+function renderWiz(){
+  // Steps header
+  let sh='';
+  STEPS.forEach((s,i)=>{
+    const n=i+1;
+    const sc=n<WIZ.step?'done':n===WIZ.step?'active':'pending';
+    sh+=`<div class="wizard-step"><div class="step-circle ${sc}">${n<WIZ.step?'✓':n}</div><div class="step-info"><div class="step-name ${sc}">${s.name}</div><div class="step-desc">${s.desc}</div></div></div>`;
+    if(i<STEPS.length-1) sh+=`<div class="step-conn ${n<WIZ.step?'done':''}"></div>`;
+  });
+  document.getElementById('wiz-steps').innerHTML=sh;
+  const body=document.getElementById('wiz-body');
+  [wStep1,wStep2,wStep3,wStep4,wStep5,wStep6][WIZ.step-1](body);
+  lucide.createIcons();
+}
+
+function wizNext(){if(wizValidate())WIZ.step++;renderWiz();}
+function wizPrev(){WIZ.step--;renderWiz();}
+
+function wizValidate(){
+  const d=WIZ.data;
+  if(WIZ.step===1){
+    d.nombre=document.getElementById('w-nombre')?.value?.trim();
+    d.asunto=document.getElementById('w-asunto')?.value?.trim();
+    d.periodicidad=document.querySelector('.period-option.selected')?.dataset.val;
+    d.fechaInicio=document.getElementById('w-fecha')?.value;
+    d.remitente=document.getElementById('w-remitente')?.value;
+    if(!d.nombre){toast('Ingresa un nombre','error');return false;}
+    if(!d.asunto){toast('Ingresa el asunto','error');return false;}
+    if(!d.periodicidad){toast('Selecciona periodicidad','error');return false;}
+    return true;
+  }
+  if(WIZ.step===2){if(!d.contactos?.length){toast('Agrega al menos un contacto','error');return false;}return true;}
+  if(WIZ.step===3){if(!d.plantillaId){toast('Selecciona una plantilla','error');return false;}return true;}
+  return true;
+}
+
+// Step 1 – Config
+function wStep1(body){
+  const d=WIZ.data;
+  body.innerHTML=`
+  <h3 style="font-family:var(--fh);font-size:18px;font-weight:700;margin-bottom:22px">Configuración General</h3>
+  <div class="form-row cols-2">
+    <div class="form-group"><label>Nombre del Envío *</label><input id="w-nombre" value="${d.nombre||''}" placeholder="Ej: Newsletter Agosto 2025"/></div>
+    <div class="form-group"><label>Asunto del Correo *</label><input id="w-asunto" value="${d.asunto||''}" placeholder="Ej: ¡Novedades de este mes!"/></div>
+  </div>
+  <div class="form-group"><label>Periodicidad *</label>
+    <div class="period-options">
+      <div class="period-option ${d.periodicidad==='Diario'?'selected':''}" data-val="Diario" onclick="pickPeriod(this)"><div class="period-icon">📅</div><div class="period-label">Diario</div><div class="period-desc">Cada día</div></div>
+      <div class="period-option ${d.periodicidad==='Semanal'?'selected':''}" data-val="Semanal" onclick="pickPeriod(this)"><div class="period-icon">📆</div><div class="period-label">Semanal</div><div class="period-desc">Cada semana</div></div>
+      <div class="period-option ${d.periodicidad==='Mensual'?'selected':''}" data-val="Mensual" onclick="pickPeriod(this)"><div class="period-icon">🗓️</div><div class="period-label">Mensual</div><div class="period-desc">Cada mes</div></div>
+    </div>
+  </div>
+  <div class="form-row cols-2">
+    <div class="form-group"><label>Fecha de Inicio</label><input id="w-fecha" type="date" value="${d.fechaInicio||''}"/></div>
+    <div class="form-group"><label>Nombre del Remitente</label><input id="w-remitente" value="${d.remitente||''}" placeholder="Mi Empresa S.A."/></div>
+  </div>
+  <div class="wizard-actions">
+    <button class="btn btn-ghost" onclick="navigate('envios')">Cancelar</button>
+    <button class="btn btn-primary" onclick="wizNext()">Siguiente <i data-lucide="arrow-right" style="width:13px;height:13px"></i></button>
+  </div>`;
+}
+function pickPeriod(el){document.querySelectorAll('.period-option').forEach(o=>o.classList.remove('selected'));el.classList.add('selected');}
+
+// Step 2 – Contacts
+function wStep2(body){
+  const sel=WIZ.data.contactos||[];
+  body.innerHTML=`
+  <h3 style="font-family:var(--fh);font-size:18px;font-weight:700;margin-bottom:20px">Recolección de Datos</h3>
+  <div class="tabs">
+    <div class="tab active" id="wt-db" onclick="wctab('db')">Desde la Base</div>
+    <div class="tab" id="wt-csv" onclick="wctab('csv')">Importar CSV</div>
+    <div class="tab" id="wt-quick" onclick="wctab('quick')">Pegado Rápido</div>
+  </div>
+  <div id="wc-db">
+    ${S.contactos.length?`
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <span style="font-size:13px;color:var(--muted)">${S.contactos.length} contactos disponibles</span>
+        <button class="btn btn-ghost btn-sm" onclick="wSelAll()">Todos</button>
+      </div>
+      <div style="max-height:220px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--r)">
+        ${S.contactos.map((c,i)=>`<label class="cb-row"><input type="checkbox" data-i="${i}" onchange="wUpdContacts()" ${sel.some(x=>x.email===c.email)?'checked':''}/><span style="font-size:13px">${c.nombre||'Sin nombre'}</span><span style="font-size:12px;color:var(--muted);margin-left:auto">${c.email}</span></label>`).join('')}
+      </div>`:
+      `<div class="empty" style="padding:24px"><p>No hay contactos. <a style="color:var(--primary);cursor:pointer" onclick="navigate('contactos')">Agregar contactos →</a></p></div>`}
+  </div>
+  <div id="wc-csv" style="display:none">
+    <label>CSV (encabezados: nombre, email, empresa...)</label>
+    <textarea id="w-csv-ta" placeholder="nombre,email,empresa&#10;Juan,juan@mail.com,ACME" style="min-height:120px;font-family:monospace;font-size:12px"></textarea>
+    <button class="btn btn-accent btn-sm" style="margin-top:8px" onclick="wImportCSV()"><i data-lucide="upload" style="width:13px;height:13px"></i>Importar</button>
+  </div>
+  <div id="wc-quick" style="display:none">
+    <label>Un email por línea (o: nombre,email)</label>
+    <textarea id="w-quick-ta" placeholder="juan@empresa.com&#10;Carlos Pérez,carlos@empresa.com" style="min-height:120px"></textarea>
+    <button class="btn btn-accent btn-sm" style="margin-top:8px" onclick="wImportQuick()"><i data-lucide="plus" style="width:13px;height:13px"></i>Agregar</button>
+  </div>
+  <div style="margin-top:14px;padding:11px 14px;background:var(--s2);border-radius:var(--r);display:flex;align-items:center;gap:8px">
+    <span style="color:var(--primary);font-weight:700;font-size:18px" id="w-cnt">${sel.length}</span>
+    <span style="font-size:13px;color:var(--muted)">contactos seleccionados</span>
+  </div>
+  <div class="wizard-actions">
+    <button class="btn btn-ghost" onclick="wizPrev()"><i data-lucide="arrow-left" style="width:13px;height:13px"></i> Atrás</button>
+    <button class="btn btn-primary" onclick="wizNext()">Siguiente <i data-lucide="arrow-right" style="width:13px;height:13px"></i></button>
+  </div>`;
+}
+
+function wctab(t){
+  ['db','csv','quick'].forEach(x=>{
+    document.getElementById(`wc-${x}`).style.display=x===t?'block':'none';
+    document.getElementById(`wt-${x}`)?.classList.toggle('active',x===t);
+  });
+}
+function wUpdContacts(){
+  WIZ.data.contactos=Array.from(document.querySelectorAll('#wc-db input:checked')).map(cb=>S.contactos[+cb.dataset.i]);
+  const el=document.getElementById('w-cnt');if(el)el.textContent=WIZ.data.contactos.length;
+}
+function wSelAll(){document.querySelectorAll('#wc-db input[type=checkbox]').forEach(cb=>cb.checked=true);wUpdContacts();}
+function wImportCSV(){
+  const raw=document.getElementById('w-csv-ta')?.value;
+  if(!raw?.trim())return;
+  const rows=parseCSV(raw);
+  if(!rows.length){toast('CSV inválido','error');return;}
+  WIZ.data.contactos=(WIZ.data.contactos||[]).concat(rows);
+  document.getElementById('w-cnt').textContent=WIZ.data.contactos.length;
+  toast(`${rows.length} contactos importados`,'success');
+}
+function wImportQuick(){
+  const raw=document.getElementById('w-quick-ta')?.value;
+  if(!raw?.trim())return;
+  const rows=raw.trim().split('\n').map(l=>{
+    const p=l.split(',').map(x=>x.trim());
+    return p.length>=2?{nombre:p[0],email:p[1]}:p[0].includes('@')?{nombre:'',email:p[0]}:null;
+  }).filter(Boolean);
+  WIZ.data.contactos=(WIZ.data.contactos||[]).concat(rows);
+  document.getElementById('w-cnt').textContent=WIZ.data.contactos.length;
+  toast(`${rows.length} contactos agregados`,'success');
+}
+
+// Step 3 – Template selection
+function wStep3(body){
+  if(!S.plantillas.length){
+    body.innerHTML=`<h3 style="font-family:var(--fh);font-size:18px;font-weight:700;margin-bottom:20px">Selección de Plantilla</h3>
+    <div class="empty"><div class="eicon">📋</div><h3>Sin plantillas</h3><p>Crea una plantilla primero</p><button class="btn btn-primary" onclick="openTplModal()">Nueva Plantilla</button></div>
+    <div class="wizard-actions"><button class="btn btn-ghost" onclick="wizPrev()"><i data-lucide="arrow-left" style="width:13px;height:13px"></i> Atrás</button><button class="btn btn-primary" onclick="wizNext()">Siguiente <i data-lucide="arrow-right" style="width:13px;height:13px"></i></button></div>`;
+    return;
+  }
+  body.innerHTML=`<h3 style="font-family:var(--fh);font-size:18px;font-weight:700;margin-bottom:20px">Selección de Plantilla</h3>
+  <div class="tpl-grid">${S.plantillas.map(p=>`
+    <div class="tpl-card ${WIZ.data.plantillaId===p.id?'selected':''}" data-id="${p.id}" onclick="pickTpl('${p.id}','${escH(p.nombre)}')">
+      <div class="tpl-preview"><div class="tpl-preview-inner">${p.html||'<div style="padding:10px;color:#aaa;font-size:11px">Sin contenido</div>'}</div></div>
+      <div class="tpl-info"><div class="tpl-name">${p.nombre}</div><div class="tpl-meta">Asunto: ${p.asunto||'—'}</div><div class="tpl-meta">Vars: ${detectVars(p.html).join(', ')||'ninguna'}</div></div>
+    </div>`).join('')}
+  </div>
+  <div class="wizard-actions"><button class="btn btn-ghost" onclick="wizPrev()"><i data-lucide="arrow-left" style="width:13px;height:13px"></i> Atrás</button><button class="btn btn-primary" onclick="wizNext()">Siguiente <i data-lucide="arrow-right" style="width:13px;height:13px"></i></button></div>`;
+}
+function pickTpl(id,nombre){
+  WIZ.data.plantillaId=id;WIZ.data.plantillaNombre=nombre;
+  document.querySelectorAll('.tpl-card').forEach(c=>c.classList.remove('selected'));
+  document.querySelector(`.tpl-card[data-id="${id}"]`)?.classList.add('selected');
+}
+
+// Step 4 – Mapping
+function wStep4(body){
+  const tpl=S.plantillas.find(p=>p.id===WIZ.data.plantillaId);
+  const vars=tpl?detectVars(tpl.html):[];
+  const sample=WIZ.data.contactos?.[0]||{};
+  const fields=Object.keys(sample);
+  if(!WIZ.data.mapping)WIZ.data.mapping={};
+  // Auto-map by name
+  vars.forEach(v=>{const k=v.replace(/[{}]/g,'');if(!WIZ.data.mapping[v]&&fields.includes(k))WIZ.data.mapping[v]=k;});
+  body.innerHTML=`<h3 style="font-family:var(--fh);font-size:18px;font-weight:700;margin-bottom:8px">Preparación de Datos</h3>
+  <p style="font-size:13px;color:var(--muted);margin-bottom:20px">Conecta las variables de la plantilla con los campos de tus contactos.</p>
+  ${!vars.length?`<div style="padding:20px;text-align:center;font-size:13px;color:var(--muted)">Esta plantilla no tiene variables — se enviará igual a todos.</div>`
+  :vars.map(v=>`<div class="map-row">
+    <span class="map-var">${v}</span><span class="map-arrow">→</span>
+    <select class="map-select" id="mp-${v.replace(/[{}]/g,'')}" onchange="updMapping('${v}')">
+      <option value="">Sin asignar</option>
+      ${fields.map(f=>`<option value="${f}" ${WIZ.data.mapping[v]===f?'selected':''}>${f}</option>`).join('')}
+      <option value="__lit" ${WIZ.data.mapping[v]==='__lit'?'selected':''}>Valor fijo...</option>
+    </select>
+    <input type="text" id="lit-${v.replace(/[{}]/g,'')}" placeholder="Texto fijo" value="${WIZ.data.literals?.[v]||''}" style="flex:0 0 140px;display:${WIZ.data.mapping[v]==='__lit'?'block':'none'}"/>
+  </div>`).join('')}
+  <div class="wizard-actions"><button class="btn btn-ghost" onclick="wizPrev()"><i data-lucide="arrow-left" style="width:13px;height:13px"></i> Atrás</button><button class="btn btn-primary" onclick="wizNext()">Ver Preliminar <i data-lucide="arrow-right" style="width:13px;height:13px"></i></button></div>`;
+}
+function updMapping(v){
+  if(!WIZ.data.mapping)WIZ.data.mapping={};
+  const k=v.replace(/[{}]/g,'');
+  const val=document.getElementById(`mp-${k}`)?.value;
+  WIZ.data.mapping[v]=val;
+  const lit=document.getElementById(`lit-${k}`);
+  if(lit)lit.style.display=val==='__lit'?'block':'none';
+}
+
+// Step 5 – Preview
+function wStep5(body){
+  const tpl=S.plantillas.find(p=>p.id===WIZ.data.plantillaId);
+  const contacts=WIZ.data.contactos||[];
+  const s=contacts[0]||{};
+  body.innerHTML=`<h3 style="font-family:var(--fh);font-size:18px;font-weight:700;margin-bottom:8px">Preliminar del Correo</h3>
+  <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Vista previa con datos reales. Primer contacto: <strong style="color:var(--text)">${s.nombre||s.email||'—'}</strong></p>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px">
+    ${contacts.slice(0,6).map((c,i)=>`<button class="btn btn-ghost btn-sm ${i===0?'active':''}" id="pvb-${i}" onclick="pvContact(${i})">${c.nombre||c.email||'#'+(i+1)}</button>`).join('')}
+    ${contacts.length>6?`<span style="font-size:12px;color:var(--muted);align-self:center">+${contacts.length-6} más</span>`:''}
+  </div>
+  <div class="email-preview-outer">
+    <div class="email-envelope">
+      <div class="email-meta-bar">
+        <p><strong>De:</strong> <span>${WIZ.data.remitente||'Mi Empresa'}</span></p>
+        <p><strong>Para:</strong> <span id="pv-to">${s.email||'—'}</span></p>
+        <p><strong>Asunto:</strong> <span id="pv-subject">${renderTpl(tpl?.asunto||WIZ.data.asunto||'',s)}</span></p>
+      </div>
+      <div class="email-body" id="pv-body">${renderTpl(tpl?.html||'<p style="padding:20px;color:#999">Sin contenido</p>',s)}</div>
+    </div>
+  </div>
+  <div class="wizard-actions"><button class="btn btn-ghost" onclick="wizPrev()"><i data-lucide="arrow-left" style="width:13px;height:13px"></i> Atrás</button><button class="btn btn-primary" onclick="wizNext()">Continuar <i data-lucide="arrow-right" style="width:13px;height:13px"></i></button></div>`;
+}
+function pvContact(idx){
+  const tpl=S.plantillas.find(p=>p.id===WIZ.data.plantillaId);
+  const c=WIZ.data.contactos[idx];
+  document.getElementById('pv-body').innerHTML=renderTpl(tpl?.html||'',c);
+  document.getElementById('pv-subject').textContent=renderTpl(tpl?.asunto||WIZ.data.asunto||'',c);
+  document.getElementById('pv-to').textContent=c.email||'—';
+  document.querySelectorAll('[id^="pvb-"]').forEach((b,i)=>b.classList.toggle('active',i===idx));
+}
+function renderTpl(html,contact){
+  let r=html||'';
+  const mapping=WIZ.data.mapping||{};
+  const literals=WIZ.data.literals||{};
+  return r.replace(/\{\{(\w+)\}\}/g,(match,key)=>{
+    const fk=`{{${key}}}`;
+    const mapped=mapping[fk];
+    if(mapped==='__lit')return literals[fk]||match;
+    if(mapped&&contact[mapped]!==undefined)return contact[mapped];
+    if(contact[key]!==undefined)return contact[key];
+    return match;
+  });
+}
+
+// Step 6 – Send
+function wStep6(body){
+  const d=WIZ.data;
+  body.innerHTML=`<h3 style="font-family:var(--fh);font-size:18px;font-weight:700;margin-bottom:22px">Confirmación y Envío</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:22px">
+    <div class="sum-box"><h4>Nombre del Envío</h4><p>${d.nombre}</p></div>
+    <div class="sum-box"><h4>Periodicidad</h4><p>${d.periodicidad}</p></div>
+    <div class="sum-box"><h4>Plantilla</h4><p>${d.plantillaNombre||'—'}</p></div>
+    <div class="sum-box"><h4>Destinatarios</h4><p>${d.contactos?.length||0} contactos</p></div>
+    <div class="sum-box" style="grid-column:1/-1"><h4>Asunto</h4><p>${d.asunto}</p></div>
+    <div class="sum-box"><h4>Fecha Inicio</h4><p>${d.fechaInicio||'Sin definir'}</p></div>
+    <div class="sum-box"><h4>Remitente</h4><p>${d.remitente||'Sin definir'}</p></div>
+  </div>
+  <div style="background:var(--adim);border:1px solid rgba(0,212,180,.25);border-radius:var(--r);padding:14px;margin-bottom:20px;font-size:13px;color:var(--accent)">
+    ⚠️ Herramienta de gestión — el envío se registra como <strong>Programado</strong>. Para envíos reales, conecta un proveedor SMTP o API.
+  </div>
+  <div id="wiz-send-btns" style="display:flex;flex-direction:column;gap:8px">
+    <button class="btn btn-ghost btn-lg" onclick="saveEnvio('Borrador')"><i data-lucide="save" style="width:15px;height:15px"></i>Guardar como Borrador</button>
+    <button class="btn btn-primary btn-lg" onclick="saveEnvio('Programado')"><i data-lucide="clock" style="width:15px;height:15px"></i>Programar Envío</button>
+    <button class="btn btn-accent btn-lg" onclick="simulateEnvio()"><i data-lucide="send" style="width:15px;height:15px"></i>Simular Envío Ahora</button>
+  </div>
+  <div id="wiz-send-progress" style="display:none">
+    <div class="send-anim">
+      <div class="pulse-wrap"><div class="pulse-ring"></div><div class="pulse-ring"></div><div class="pulse-ring"></div><div class="pulse-center">✉</div></div>
+      <h3 style="font-family:var(--fh);font-size:20px;margin-bottom:8px" id="sp-title">Iniciando...</h3>
+      <p style="font-size:13px;color:var(--muted)" id="sp-detail">Preparando datos...</p>
+      <div class="progress-bar" style="max-width:380px;margin:16px auto;height:10px"><div class="progress-fill" id="sp-fill" style="width:0%"></div></div>
+      <p id="sp-count" style="font-size:12px;color:var(--muted)">0 / ${d.contactos?.length||0}</p>
+    </div>
+  </div>
+  <div id="wiz-send-done" style="display:none">
+    <div class="send-anim">
+      <div style="font-size:56px;margin-bottom:14px">✅</div>
+      <h3 style="font-family:var(--fh);font-size:22px;margin-bottom:8px">¡Envío Completado!</h3>
+      <p style="color:var(--muted);margin-bottom:22px"><strong style="color:var(--success)">${d.contactos?.length||0} correos</strong> procesados exitosamente.</p>
+      <div style="display:flex;gap:8px;justify-content:center">
+        <button class="btn btn-ghost" onclick="navigate('envios')">Ver Envíos</button>
+        <button class="btn btn-primary" onclick="navigate('nuevo-envio')">Nuevo Envío</button>
+      </div>
+    </div>
+  </div>
+  <div class="wizard-actions" id="wiz-back-row">
+    <button class="btn btn-ghost" onclick="wizPrev()"><i data-lucide="arrow-left" style="width:13px;height:13px"></i> Atrás</button><div></div>
+  </div>`;
+}
+
+function saveEnvio(status){
+  const d=WIZ.data;
+  S.envios.push({id:Date.now().toString(),nombre:d.nombre,periodicidad:d.periodicidad,fechaInicio:d.fechaInicio,asunto:d.asunto,remitente:d.remitente,plantillaId:d.plantillaId,plantillaNombre:d.plantillaNombre,contactos:d.contactos,mapping:d.mapping,status,creadoEn:new Date().toISOString()});
+  LS.set('mf_envios',S.envios);
+  toast(`Envío guardado como ${status}`,'success');
+  updateBadges();navigate('envios');
+}
+
+function simulateEnvio(){
+  document.getElementById('wiz-send-btns').style.display='none';
+  document.getElementById('wiz-back-row').style.display='none';
+  document.getElementById('wiz-send-progress').style.display='block';
+  const total=WIZ.data.contactos?.length||0;
+  let cnt=0,step=0;
+  const steps=[
+    {t:'Recolectando datos...',d:'Validando emails y campos'},
+    {t:'Preparando plantillas...',d:'Aplicando variables a cada contacto'},
+    {t:'Verificando contenido...',d:'Revisando HTML y asunto del correo'},
+    {t:'Enviando correos...',d:`Procesando ${total} destinatarios`},
+    {t:'Finalizando...',d:'Registrando resultados del envío'},
+  ];
+  const iv=setInterval(()=>{
+    if(step<steps.length){document.getElementById('sp-title').textContent=steps[step].t;document.getElementById('sp-detail').textContent=steps[step].d;}
+    cnt=Math.min(total,cnt+Math.max(1,Math.ceil(total/18)));
+    const pct=total?Math.round(cnt/total*100):Math.round((step+1)/steps.length*100);
+    document.getElementById('sp-fill').style.width=pct+'%';
+    document.getElementById('sp-count').textContent=`${cnt} / ${total}`;
+    step++;
+    if(step>=steps.length&&cnt>=total){
+      clearInterval(iv);
+      setTimeout(()=>{
+        const d=WIZ.data;
+        S.envios.push({id:Date.now().toString(),nombre:d.nombre,periodicidad:d.periodicidad,fechaInicio:d.fechaInicio,asunto:d.asunto,remitente:d.remitente,plantillaId:d.plantillaId,plantillaNombre:d.plantillaNombre,contactos:d.contactos,mapping:d.mapping,status:'Enviado',enviadoEn:new Date().toISOString(),creadoEn:new Date().toISOString()});
+        LS.set('mf_envios',S.envios);updateBadges();
+        document.getElementById('wiz-send-progress').style.display='none';
+        document.getElementById('wiz-send-done').style.display='block';
+      },500);
+    }
+  },380);
+}
+
+// ─── PLANTILLAS ───────────────────────────────────────────────────────────────
+function renderTpls(){
+  const g=document.getElementById('tpl-grid');
+  if(!S.plantillas.length){
+    g.innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="eicon">📋</div><h3>Sin plantillas</h3><p>Crea tu primera plantilla de correo</p><button class="btn btn-primary" onclick="openTplModal()">Nueva Plantilla</button></div>`;
+    return;
+  }
+  g.innerHTML=S.plantillas.map((p,i)=>`
+    <div class="tpl-card">
+      <div class="tpl-preview"><div class="tpl-preview-inner">${p.html||'<div style="padding:10px;color:#aaa;font-size:11px">Sin contenido</div>'}</div></div>
+      <div class="tpl-info">
+        <div class="tpl-name">${p.nombre}</div>
+        <div class="tpl-meta">Asunto: ${p.asunto||'—'}</div>
+        <div class="tpl-meta">Variables: ${detectVars(p.html).join(', ')||'ninguna'}</div>
+        <div style="display:flex;gap:6px;margin-top:10px">
+          <button class="btn btn-ghost btn-sm" style="flex:1" onclick="openTplModal(${i})">Editar</button>
+          <button class="btn btn-danger btn-sm" onclick="delTpl(${i})">✕</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function openTplModal(idx){
+  editTplIdx=idx!==undefined?idx:null;
+  const m=document.getElementById('modal-tpl');
+  if(idx!==undefined){
+    const p=S.plantillas[idx];
+    document.getElementById('modal-tpl-title').textContent='Editar Plantilla';
+    document.getElementById('pt-nombre').value=p.nombre;
+    document.getElementById('pt-asunto').value=p.asunto||'';
+    document.getElementById('pt-html').value=p.html||'';
+    updatePreview();
+  }else{
+    document.getElementById('modal-tpl-title').textContent='Nueva Plantilla';
+    document.getElementById('pt-nombre').value='';
+    document.getElementById('pt-asunto').value='';
+    document.getElementById('pt-html').value='';
+    document.getElementById('pt-preview').innerHTML='';
+  }
+  m.style.display='flex';
+}
+function closeTplModal(){document.getElementById('modal-tpl').style.display='none';editTplIdx=null;}
+function updatePreview(){document.getElementById('pt-preview').innerHTML=document.getElementById('pt-html')?.value||'';}
+function insertVar(v){
+  const ta=document.getElementById('pt-html');if(!ta)return;
+  const s=ta.selectionStart,e=ta.selectionEnd;
+  ta.value=ta.value.slice(0,s)+v+ta.value.slice(e);
+  ta.selectionStart=ta.selectionEnd=s+v.length;ta.focus();updatePreview();
+}
+function saveTpl(){
+  const nombre=document.getElementById('pt-nombre').value.trim();
+  const asunto=document.getElementById('pt-asunto').value.trim();
+  const html=document.getElementById('pt-html').value;
+  if(!nombre){toast('Ingresa un nombre','error');return;}
+  if(!html.trim()){toast('El HTML está vacío','error');return;}
+  if(editTplIdx!==null){
+    S.plantillas[editTplIdx]={...S.plantillas[editTplIdx],nombre,asunto,html};
+    toast('Plantilla actualizada','success');
+  }else{
+    S.plantillas.push({id:Date.now().toString(),nombre,asunto,html,creadoEn:new Date().toISOString()});
+    toast('Plantilla creada','success');
+  }
+  LS.set('mf_plantillas',S.plantillas);updateBadges();closeTplModal();renderTpls();
+}
+function delTpl(i){
+  if(!confirm('¿Eliminar esta plantilla?'))return;
+  S.plantillas.splice(i,1);LS.set('mf_plantillas',S.plantillas);
+  renderTpls();updateBadges();toast('Plantilla eliminada','info');
+}
+function loadDefaultTpl(){
+  document.getElementById('pt-html').value=`<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
+  <div style="background:#4f7cff;padding:28px 24px;text-align:center;border-radius:8px 8px 0 0">
+    <h1 style="color:#fff;margin:0;font-size:22px">¡Hola, {{nombre}}!</h1>
+  </div>
+  <div style="background:#f8fafc;padding:28px 24px;border:1px solid #e2e8f0;border-top:none">
+    <p style="color:#334155;font-size:15px;line-height:1.7">Queremos compartirte las últimas novedades de <strong>{{empresa}}</strong>.</p>
+    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:20px;margin:20px 0">
+      <h2 style="color:#1e293b;font-size:17px;margin:0 0 10px">Mensaje Principal</h2>
+      <p style="color:#64748b;font-size:14px;line-height:1.6">Personaliza este contenido con tu mensaje. Usa variables como {{nombre}} para personalizar cada correo.</p>
+    </div>
+    <a href="#" style="display:inline-block;background:#4f7cff;color:#fff;padding:11px 22px;border-radius:6px;text-decoration:none;font-weight:600;font-size:14px">Ver más →</a>
+  </div>
+  <div style="background:#f1f5f9;padding:14px 24px;text-align:center;border-radius:0 0 8px 8px">
+    <p style="color:#94a3b8;font-size:11px;margin:0">Recibiste este correo porque estás suscrito. <a href="#" style="color:#94a3b8">Cancelar suscripción</a></p>
+  </div>
+</div>`;
+  updatePreview();
+}
+
+// ─── CONTACTS ─────────────────────────────────────────────────────────────────
+function ctab(t){
+  ['manual','csv','lista'].forEach(x=>{
+    document.getElementById(`ct-${x}`).style.display=x===t?'block':'none';
+  });
+  document.querySelectorAll('#section-contactos .tab').forEach((el,i)=>{
+    el.classList.toggle('active',['manual','csv','lista'][i]===t);
+  });
+  if(t==='lista')renderContactos();
+}
+
+function addContact(){
+  const nombre=document.getElementById('cn-nombre').value.trim();
+  const email=document.getElementById('cn-email').value.trim();
+  const empresa=document.getElementById('cn-empresa').value.trim();
+  const extra1=document.getElementById('cn-e1').value.trim();
+  const extra2=document.getElementById('cn-e2').value.trim();
+  if(!email){toast('El email es obligatorio','error');return;}
+  if(!/\S+@\S+\.\S+/.test(email)){toast('Email inválido','error');return;}
+  if(S.contactos.some(c=>c.email===email)){toast('Email ya existe','error');return;}
+  S.contactos.push({nombre,email,empresa,extra1,extra2});
+  LS.set('mf_contactos',S.contactos);updateBadges();
+  ['cn-nombre','cn-email','cn-empresa','cn-e1','cn-e2'].forEach(id=>document.getElementById(id).value='');
+  toast(`Contacto agregado`,'success');
+}
+
+function importCSV(){
+  const raw=document.getElementById('csv-raw').value;
+  if(!raw.trim())return;
+  const rows=parseCSV(raw);
+  if(!rows.length){toast('CSV inválido','error');return;}
+  let added=0;
+  rows.forEach(r=>{if(r.email&&!S.contactos.some(c=>c.email===r.email)){S.contactos.push(r);added++;}});
+  LS.set('mf_contactos',S.contactos);updateBadges();
+  toast(`${added} importados (${rows.length-added} duplicados omitidos)`,'success');
+  document.getElementById('csv-raw').value='';
+  renderContactos();
+}
+
+function renderContactos(){
+  const tb=document.getElementById('tbody-contactos');
+  if(!S.contactos.length){tb.innerHTML=`<tr><td colspan="6"><div class="empty" style="padding:24px"><p>Sin contactos</p></div></td></tr>`;return;}
+  tb.innerHTML=S.contactos.map((c,i)=>`<tr>
+    <td>${c.nombre||'—'}</td><td>${c.email}</td><td>${c.empresa||'—'}</td><td>${c.extra1||'—'}</td><td>${c.extra2||'—'}</td>
+    <td><button class="btn btn-danger btn-sm" onclick="delContact(${i})">✕</button></td>
+  </tr>`).join('');
+}
+function delContact(i){
+  S.contactos.splice(i,1);LS.set('mf_contactos',S.contactos);
+  renderContactos();updateBadges();toast('Contacto eliminado','info');
+}
+
+// ─── UTILS ────────────────────────────────────────────────────────────────────
+function parseCSV(raw){
+  const lines=raw.trim().split('\n');
+  if(lines.length<2)return[];
+  const headers=lines[0].split(',').map(h=>h.trim().toLowerCase().replace(/[^a-z0-9]/g,'_'));
+  return lines.slice(1).map(line=>{
+    const vals=line.split(',').map(v=>v.trim());
+    const obj={};headers.forEach((h,i)=>obj[h]=vals[i]||'');
+    return obj;
+  }).filter(o=>o.email&&o.email.includes('@'));
+}
+
+function detectVars(html){
+  if(!html)return[];
+  return[...new Set((html.match(/\{\{(\w+)\}\}/g)||[]))];
+}
+
+function escH(s){return(s||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');}
+
+function clearAll(){
+  if(!confirm('¿Eliminar todos los datos guardados?'))return;
+  ['mf_envios','mf_plantillas','mf_contactos'].forEach(k=>localStorage.removeItem(k));
+  S.envios=[];S.plantillas=[];S.contactos=[];
+  updateBadges();navigate('dashboard');toast('Datos limpiados','info');
+}
+
+function loadDemo(){
+  // Demo contacts
+  const demoContacts=[
+    {nombre:'María García',email:'maria@acme.com',empresa:'ACME Corp',extra1:'Premium',extra2:''},
+    {nombre:'Carlos López',email:'carlos@beta.io',empresa:'Beta Tech',extra1:'Standard',extra2:''},
+    {nombre:'Ana Martínez',email:'ana@gamma.co',empresa:'Gamma SA',extra1:'Premium',extra2:''},
+    {nombre:'Pedro Ruiz',email:'pedro@delta.net',empresa:'Delta Inc',extra1:'Basic',extra2:''},
+    {nombre:'Laura Soto',email:'laura@epsilon.cl',empresa:'Epsilon Ltda',extra1:'Premium',extra2:''},
+  ];
+  demoContacts.forEach(c=>{if(!S.contactos.some(x=>x.email===c.email))S.contactos.push(c);});
+  LS.set('mf_contactos',S.contactos);
+
+  // Demo template
+  if(!S.plantillas.some(p=>p.nombre==='Newsletter Demo')){
+    S.plantillas.push({
+      id:'demo-tpl-1',
+      nombre:'Newsletter Demo',
+      asunto:'¡{{nombre}}, noticias de {{empresa}}!',
+      html:`<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
+  <div style="background:linear-gradient(135deg,#4f7cff,#00d4b4);padding:32px 24px;text-align:center;border-radius:8px 8px 0 0">
+    <h1 style="color:#fff;margin:0 0 8px;font-size:24px">¡Hola, {{nombre}}!</h1>
+    <p style="color:rgba(255,255,255,.85);margin:0;font-size:14px">Newsletter de {{empresa}}</p>
+  </div>
+  <div style="background:#f8fafc;padding:28px 24px;border:1px solid #e2e8f0;border-top:none">
+    <p style="color:#334155;font-size:15px;line-height:1.7">Gracias por ser cliente <strong>{{extra1}}</strong>. Aquí tienes las últimas novedades.</p>
+    <div style="background:#fff;border-left:4px solid #4f7cff;padding:16px 20px;margin:20px 0;border-radius:0 8px 8px 0">
+      <p style="color:#1e293b;font-size:14px;line-height:1.6;margin:0">Este es tu contenido personalizado. Cada destinatario ve su propio nombre y empresa.</p>
+    </div>
+    <a href="#" style="display:inline-block;background:#4f7cff;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:600;font-size:14px">Ver más →</a>
+  </div>
+  <div style="background:#f1f5f9;padding:14px;text-align:center;border-radius:0 0 8px 8px">
+    <p style="color:#94a3b8;font-size:11px;margin:0">© 2025 · <a href="#" style="color:#94a3b8">Cancelar suscripción</a></p>
+  </div>
+</div>`,
+      creadoEn:new Date().toISOString()
+    });
+    LS.set('mf_plantillas',S.plantillas);
+  }
+  updateBadges();navigate('dashboard');
+  toast('Datos de demo cargados','success');
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded',()=>{
+  lucide.createIcons();
+  renderDash();
+  updateBadges();
+});
+</script>
+</body>
+</html>

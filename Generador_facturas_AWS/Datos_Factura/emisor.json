@@ -1,0 +1,15 @@
+{
+  "_ayuda": "Empresa que emite la factura. 'logo' puede ser una ruta a un PNG/JPG (por ejemplo Datos_Factura/logo.png).",
+  "razon_social": "[COMPLETAR] RAZÓN SOCIAL DEL EMISOR S.A.C.",
+  "nombre_comercial": "",
+  "ruc": "[COMPLETAR]",
+  "direccion": "[COMPLETAR] Av. ..., Distrito, Lima - Perú",
+  "telefono": "",
+  "email": "",
+  "web": "",
+  "logo": "",
+  "cuentas_bancarias": [
+    {"banco": "[COMPLETAR] Banco", "moneda": "USD", "cuenta": "[COMPLETAR]", "cci": "[COMPLETAR]"}
+  ],
+  "cuenta_detracciones_bn": "[COMPLETAR] N° cuenta de detracciones Banco de la Nación"
+}

@@ -1,0 +1,36 @@
+{
+  "_ayuda": "Parámetros de facturación. 'correlativo' es el número de la PRÓXIMA factura y avanza solo cada vez que se emite una. 'agrupar_por': servicio | cuenta | unico.",
+  "documento": {
+    "serie": "F001",
+    "correlativo": 1,
+    "moneda": "USD",
+    "forma_pago": "Crédito",
+    "dias_credito": 30,
+    "agrupar_por": "servicio",
+    "incluir_items_sin_costo_en_anexo": false
+  },
+  "tributos": {
+    "aplicar_igv": true,
+    "igv_tasa": 0.18,
+    "detraccion": {
+      "aplicar": true,
+      "tasa": 0.12,
+      "codigo": "037",
+      "descripcion": "Demás servicios gravados con el IGV",
+      "monto_minimo_pen": 700
+    }
+  },
+  "cargos_adicionales": {
+    "cargo_gestion_porcentaje": 0,
+    "cargo_gestion_fijo_usd": 0,
+    "concepto": "Servicio de administración y gestión de la plataforma AWS"
+  },
+  "cuentas_aws": {
+    "177415703619": {"ambiente": "Producción", "codigo": "PRD"},
+    "896468441061": {"ambiente": "UAT – Pruebas de usuario", "codigo": "UAT"}
+  },
+  "observaciones": [
+    "Importes en dólares americanos según los estados de cuenta emitidos por Amazon Web Services, Inc. para el período facturado.",
+    "El detalle de consumo por servicio, región y concepto se presenta en los anexos de este documento."
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "_ayuda": "Destinatario de la factura. Reemplaza cada [COMPLETAR]; mientras quede alguno, las facturas se generan como BORRADOR.",
+  "razon_social": "ACRES SOCIEDAD ADMINISTRADORA DE FONDOS S.A.",
+  "nombre_corto": "ACRES SAFI",
+  "ruc": "20545896118",
+  "direccion": "[COMPLETAR] Dirección fiscal de ACRES",
+  "atencion": "[COMPLETAR] Nombre del encargado",
+  "cargo": "Gerencia de Administración y Finanzas",
+  "email": ""
+}

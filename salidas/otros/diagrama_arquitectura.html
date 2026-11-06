@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>iDepositary — Diagrama de Migración React + Spring Boot</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+  /* ── RESET & BASE ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:        #0b0f1a;
+    --bg2:       #111827;
+    --bg3:       #1a2235;
+    --border:    rgba(255,255,255,.08);
+    --blue:      #3b82f6;
+    --blue-dk:   #1d4ed8;
+    --cyan:      #06b6d4;
+    --green:     #10b981;
+    --amber:     #f59e0b;
+    --purple:    #8b5cf6;
+    --pink:      #ec4899;
+    --red:       #ef4444;
+    --t1:        #f1f5f9;
+    --t2:        #94a3b8;
+    --t3:        #475569;
+    --radius:    12px;
+    --shadow:    0 8px 40px rgba(0,0,0,.5);
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--t1);
+    line-height: 1.6;
+    padding: 2rem;
+  }
+
+  /* ── LAYOUT ── */
+  .page { max-width: 1280px; margin: 0 auto; }
+  .section { margin-bottom: 4rem; }
+
+  /* ── HERO ── */
+  .hero {
+    text-align: center;
+    padding: 3rem 2rem 2.5rem;
+    background: linear-gradient(135deg, rgba(59,130,246,.12), rgba(6,182,212,.06));
+    border: 1px solid rgba(59,130,246,.25);
+    border-radius: 20px;
+    margin-bottom: 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(59,130,246,.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: .5rem;
+    background: rgba(59,130,246,.15); border: 1px solid rgba(59,130,246,.35);
+    border-radius: 999px; padding: .3rem 1rem;
+    font-size: .78rem; font-weight: 600; color: var(--cyan);
+    letter-spacing: .05em; text-transform: uppercase;
+    margin-bottom: 1.2rem;
+  }
+  .hero h1 {
+    font-size: 2.6rem; font-weight: 800; letter-spacing: -.03em;
+    background: linear-gradient(135deg, #f1f5f9 30%, var(--cyan));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    margin-bottom: .75rem;
+  }
+  .hero p { color: var(--t2); font-size: 1.05rem; max-width: 640px; margin: 0 auto 1.5rem; }
+  .hero-meta {
+    display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap;
+  }
+  .hero-meta span {
+    display: flex; align-items: center; gap: .4rem;
+    font-size: .85rem; color: var(--t2);
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+
+  /* ── SECTION TITLE ── */
+  .sec-title {
+    display: flex; align-items: center; gap: .75rem;
+    margin-bottom: 1.5rem;
+  }
+  .sec-title .num {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: linear-gradient(135deg, var(--blue), var(--cyan));
+    display: flex; align-items: center; justify-content: center;
+    font-size: .85rem; font-weight: 700; color: #fff; flex-shrink: 0;
+  }
+  .sec-title h2 { font-size: 1.35rem; font-weight: 700; color: var(--t1); }
+  .sec-title p { font-size: .875rem; color: var(--t2); margin-top: .15rem; }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+  }
+  .card-header {
+    display: flex; align-items: center; gap: .6rem;
+    font-size: .75rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .08em; color: var(--t3);
+    margin-bottom: 1rem; padding-bottom: .75rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .card-icon {
+    width: 28px; height: 28px; border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+  }
+
+  /* ── MERMAID CONTAINER ── */
+  .mermaid-wrap {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 2rem;
+    overflow-x: auto;
+    box-shadow: var(--shadow);
+  }
+  .mermaid { display: flex; justify-content: center; }
+
+  /* ── GRID LAYOUTS ── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.25rem; }
+
+  /* ── MODULE CARDS ── */
+  .module {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    transition: border-color .2s;
+  }
+  .module:hover { border-color: rgba(59,130,246,.4); }
+  .module-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: .75rem;
+  }
+  .module-name { font-size: .95rem; font-weight: 700; color: var(--t1); }
+  .module-type {
+    font-size: .68rem; font-weight: 600; padding: .2rem .55rem;
+    border-radius: 999px; text-transform: uppercase; letter-spacing: .05em;
+  }
+  .type-jar { background: rgba(16,185,129,.15); color: var(--green); border: 1px solid rgba(16,185,129,.3); }
+  .type-war { background: rgba(59,130,246,.15); color: var(--blue); border: 1px solid rgba(59,130,246,.3); }
+  .type-new { background: rgba(139,92,246,.15); color: var(--purple); border: 1px solid rgba(139,92,246,.3); }
+  .module-desc { font-size: .8rem; color: var(--t2); margin-bottom: .75rem; }
+  .module-files {
+    display: flex; gap: .4rem; flex-wrap: wrap;
+  }
+  .file-tag {
+    font-size: .7rem; background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.1); border-radius: 5px;
+    padding: .15rem .45rem; color: var(--t2); font-family: monospace;
+  }
+  .arrow-row {
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; color: var(--blue); margin: .5rem 0;
+  }
+
+  /* ── MIGRATION TABLE ── */
+  .mig-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+  .mig-table th {
+    background: rgba(59,130,246,.1); color: var(--t2);
+    font-weight: 600; font-size: .75rem; text-transform: uppercase;
+    letter-spacing: .06em; padding: .75rem 1rem; text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .mig-table td {
+    padding: .7rem 1rem; border-bottom: 1px solid rgba(255,255,255,.04);
+    color: var(--t1); vertical-align: top;
+  }
+  .mig-table tr:hover td { background: rgba(255,255,255,.02); }
+  .mig-table code {
+    font-family: 'Consolas', monospace; font-size: .78rem;
+    background: rgba(0,0,0,.3); border-radius: 4px; padding: .1rem .35rem;
+    color: var(--cyan);
+  }
+  .tag {
+    display: inline-flex; align-items: center;
+    font-size: .68rem; font-weight: 700; padding: .15rem .5rem;
+    border-radius: 999px; text-transform: uppercase; letter-spacing: .04em;
+  }
+  .tag-del  { background: rgba(239,68,68,.15);   color: var(--red);    border: 1px solid rgba(239,68,68,.3); }
+  .tag-keep { background: rgba(16,185,129,.15);  color: var(--green);  border: 1px solid rgba(16,185,129,.3); }
+  .tag-mod  { background: rgba(245,158,11,.15);  color: var(--amber);  border: 1px solid rgba(245,158,11,.3); }
+  .tag-new2 { background: rgba(139,92,246,.15);  color: var(--purple); border: 1px solid rgba(139,92,246,.3); }
+
+  /* ── TIMELINE ── */
+  .timeline { display: flex; flex-direction: column; gap: 1rem; }
+  .tl-item {
+    display: grid; grid-template-columns: 120px 1fr;
+    gap: 1.25rem; align-items: start;
+  }
+  .tl-label {
+    text-align: right; padding-top: .15rem;
+  }
+  .tl-label .phase {
+    font-size: .75rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .06em; color: var(--t3);
+  }
+  .tl-label .weeks {
+    font-size: .8rem; color: var(--t2); display: block; margin-top: .1rem;
+  }
+  .tl-bar-wrap { display: flex; flex-direction: column; gap: .3rem; }
+  .tl-bar {
+    height: 36px; border-radius: 8px;
+    display: flex; align-items: center; padding: 0 1rem;
+    font-size: .82rem; font-weight: 600; color: #fff;
+    position: relative; overflow: hidden;
+  }
+  .tl-bar::before {
+    content: ''; position: absolute; inset: 0;
+    background: rgba(255,255,255,.08);
+  }
+  .bar-0  { background: linear-gradient(90deg, #1d4ed8, #2563eb); }
+  .bar-1  { background: linear-gradient(90deg, #0891b2, #0e7490); }
+  .bar-2  { background: linear-gradient(90deg, #059669, #047857); }
+  .bar-3  { background: linear-gradient(90deg, #7c3aed, #6d28d9); }
+  .bar-4  { background: linear-gradient(90deg, #b45309, #92400e); }
+  .bar-5  { background: linear-gradient(90deg, #be185d, #9d174d); }
+  .bar-6  { background: linear-gradient(90deg, #374151, #1f2937); }
+  .tl-tags { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .3rem; }
+
+  /* ── RISK TABLE ── */
+  .risk-high   td:first-child::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--red); margin-right: .5rem; }
+  .risk-med    td:first-child::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--amber); margin-right: .5rem; }
+  .risk-low    td:first-child::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--green); margin-right: .5rem; }
+
+  /* ── STAT PILLS ── */
+  .stats-row { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem; }
+  .stat-pill {
+    flex: 1; min-width: 160px;
+    background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 1.1rem 1.25rem;
+    display: flex; flex-direction: column; gap: .25rem;
+  }
+  .stat-pill .num { font-size: 1.9rem; font-weight: 800; color: var(--t1); line-height: 1; }
+  .stat-pill .lbl { font-size: .78rem; color: var(--t2); font-weight: 500; }
+  .stat-pill .sub { font-size: .72rem; color: var(--t3); }
+  .accent-blue  .num { color: var(--blue); }
+  .accent-cyan  .num { color: var(--cyan); }
+  .accent-green .num { color: var(--green); }
+  .accent-amber .num { color: var(--amber); }
+  .accent-purple .num { color: var(--purple); }
+
+  /* ── PATTERN CARDS ── */
+  .pattern-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+  .pattern-card {
+    background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 1.25rem;
+  }
+  .pattern-label {
+    font-size: .7rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .07em; margin-bottom: .5rem;
+    display: flex; align-items: center; gap: .4rem;
+  }
+  .pattern-label.before { color: var(--red); }
+  .pattern-label.after  { color: var(--green); }
+  pre {
+    font-family: 'Consolas', 'Fira Code', monospace;
+    font-size: .72rem; line-height: 1.6;
+    background: rgba(0,0,0,.4); border-radius: 8px; padding: .75rem 1rem;
+    overflow-x: auto; color: #e2e8f0;
+    border: 1px solid rgba(255,255,255,.07);
+  }
+  .kw  { color: #93c5fd; } /* keyword */
+  .an  { color: #86efac; } /* annotation */
+  .st  { color: #fcd34d; } /* string */
+  .cm  { color: #64748b; } /* comment */
+  .cl  { color: #c084fc; } /* class name */
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center; padding: 2rem;
+    border-top: 1px solid var(--border);
+    color: var(--t3); font-size: .8rem; margin-top: 2rem;
+  }
+
+  /* ── PRINT ── */
+  @media print {
+    body { background: #fff; color: #000; }
+    .hero { border: 2px solid #3b82f6; }
+  }
+  @media (max-width: 900px) {
+    .grid-2, .grid-3, .pattern-grid { grid-template-columns: 1fr; }
+    body { padding: 1rem; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ── HERO ── -->
+  <div class="hero">
+    <div class="hero-badge">📐 Arquitectura de Software · 2026</div>
+    <h1>iDepositary Migration</h1>
+    <p>Plan de migración de sistema financiero enterprise desde Java EE + JSF/PrimeFaces hacia React 18 + Spring Boot 3.x</p>
+    <div class="hero-meta">
+      <span><span class="dot" style="background:var(--blue)"></span> 6 módulos Maven</span>
+      <span><span class="dot" style="background:var(--cyan)"></span> 2.295 archivos Java</span>
+      <span><span class="dot" style="background:var(--green)"></span> 331 páginas XHTML</span>
+      <span><span class="dot" style="background:var(--amber)"></span> 16 semanas estimadas</span>
+    </div>
+  </div>
+
+  <!-- ── STATS ── -->
+  <div class="stats-row">
+    <div class="stat-pill accent-blue">
+      <span class="num">6</span>
+      <span class="lbl">Módulos Maven</span>
+      <span class="sub">iModel, iCommons, iIntegration…</span>
+    </div>
+    <div class="stat-pill accent-cyan">
+      <span class="num">2.295</span>
+      <span class="lbl">Archivos Java</span>
+      <span class="sub">Java EE 8 · javax.*</span>
+    </div>
+    <div class="stat-pill accent-green">
+      <span class="num">331</span>
+      <span class="lbl">Páginas XHTML</span>
+      <span class="sub">PrimeFaces 6.2 · JSF 2.3</span>
+    </div>
+    <div class="stat-pill accent-amber">
+      <span class="num">16</span>
+      <span class="lbl">Semanas</span>
+      <span class="sub">4 meses · 6 personas</span>
+    </div>
+    <div class="stat-pill accent-purple">
+      <span class="num">5</span>
+      <span class="lbl">Patrones clave</span>
+      <span class="sub">EJB→Spring · JSF→React…</span>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       1. ARQUITECTURA ACTUAL
+  ══════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="sec-title">
+      <div class="num">1</div>
+      <div>
+        <h2>Arquitectura Actual — Java EE + WildFly</h2>
+        <p>Stack monolítico desplegado en JBoss/WildFly con JSF + PrimeFaces como frontend</p>
+      </div>
+    </div>
+
+    <div class="mermaid-wrap">
+      <div class="mermaid">
+graph TB
+  subgraph BROWSER["🌐  Navegador"]
+    UI["PrimeFaces 6.2 · XHTML/Facelets\nOmniFaces · DeltaSpike"]
+  end
+
+  subgraph WILDFLY["⚙️  WildFly / JBoss — Java EE 8"]
+    direction TB
+    subgraph VIEW["Capa Vista  —  @Named @ViewScoped"]
+      MB1["HolderMgmtBean"]
+      MB2["AssetLaundryBean"]
+      MB3["HolderAccountMgmtBean"]
+      MB4["HubspotSyncMgmtBean"]
+    end
+
+    subgraph FACADE["Capa Facade  —  EJB @Stateless"]
+      F1["HolderServiceFacade"]
+      F2["AssetLaundryFacade"]
+      F3["HolderAccountServiceFacade"]
+    end
+
+    subgraph SERVICE["Capa Service  —  EJB @Stateless"]
+      S1["HolderServiceBean"]
+      S2["AssetLaundryServiceBean"]
+      S3["HolderAccountServiceBean"]
+      S4["BatchServiceBean"]
+    end
+
+    subgraph DAO["Capa DAO  —  extends CrudDaoServiceBean"]
+      D1["HolderAccountDAO"]
+      D2["AccountStatementDAO"]
+      D3["RepresentativeDAO"]
+    end
+
+    subgraph MODEL["iModel  —  JPA / Hibernate 5.3"]
+      E1["Holder"]
+      E2["HolderAccount"]
+      E3["OperationSettlement"]
+      E4["AccountingProcess"]
+    end
+
+    subgraph CROSS["Cross-cutting"]
+      C1["iIntegration\nJWT · Audit · Types"]
+      C2["iCoreFramework\nBatch · Interceptors"]
+      C3["iCoreComponent\nSOAP · QR · PDF"]
+    end
+  end
+
+  subgraph EXT["🔗  Servicios Externos"]
+    EX1["BCB / EDV\nSOAP / Axis 1.4"]
+    EX2["HubSpot\nREST / OkHttp"]
+    EX3["SFTP / SMV\nJSch"]
+  end
+
+  DB[("🗄️  Oracle / PostgreSQL")]
+
+  UI -->|JSF Lifecycle| VIEW
+  VIEW -->|@EJB| FACADE
+  FACADE -->|@EJB| SERVICE
+  SERVICE -->|@EJB| DAO
+  DAO -->|JPQL| MODEL
+  MODEL -->|JPA| DB
+  SERVICE --> CROSS
+  CROSS --> EXT
+
+  style BROWSER fill:#1e2a3a,stroke:#3b82f6,stroke-width:2px,color:#93c5fd
+  style WILDFLY fill:#111827,stroke:#374151,stroke-width:2px,color:#e2e8f0
+  style VIEW    fill:#1a1f35,stroke:#3b82f6,color:#93c5fd
+  style FACADE  fill:#1a2535,stroke:#06b6d4,color:#67e8f9
+  style SERVICE fill:#1a2a20,stroke:#10b981,color:#6ee7b7
+  style DAO     fill:#2a1f10,stroke:#f59e0b,color:#fcd34d
+  style MODEL   fill:#201a35,stroke:#8b5cf6,color:#c4b5fd
+  style CROSS   fill:#2a1a20,stroke:#ec4899,color:#f9a8d4
+  style EXT     fill:#1f1f1f,stroke:#475569,color:#94a3b8
+  style DB      fill:#1a2535,stroke:#60a5fa,color:#93c5fd
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       2. ARQUITECTURA OBJETIVO
+  ══════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="sec-title">
+      <div class="num">2</div>
+      <div>
+        <h2>Arquitectura Objetivo — React 18 + Spring Boot 3.x</h2>
+        <p>Separación total de frontend SPA y backend API REST con Jakarta EE 10</p>
+      </div>
+    </div>
+
+    <div class="mermaid-wrap">
+      <div class="mermaid">
+graph TB
+  subgraph BROWSER["🌐  React 18 + TypeScript (Vite)"]
+    direction LR
+    subgraph PAGES["Features / Pages"]
+      P1["HoldersPage"]
+      P2["PlaftPage"]
+      P3["AccountsPage"]
+      P4["BatchMonitorPage"]
+    end
+    subgraph SHARED["Shared Components"]
+      SC1["ServerDataTable"]
+      SC2["FileUploader"]
+      SC3["Modal / Form"]
+    end
+    subgraph STATE["State — React Query + Zustand"]
+      ST1["useHolders"]
+      ST2["useAuth / JWT"]
+      ST3["useWebSocket / SSE"]
+    end
+    API_C["api/client.ts\naxios + interceptors"]
+  end
+
+  subgraph SB["☕  Spring Boot 3.3 — Jakarta EE 10"]
+    direction TB
+    subgraph SECURITY["🔐  Security Layer"]
+      SEC1["SecurityConfig\nJWT Filter"]
+      SEC2["CorsConfig\nOpenAPI"]
+    end
+
+    subgraph CTRL["REST Controllers"]
+      CT1["HolderController\nGET/POST/PUT/PATCH"]
+      CT2["PlaftController\nOFAC · PEP · PNA · UIF"]
+      CT3["AccountController"]
+      CT4["BatchController"]
+      CT5["AuthController"]
+    end
+
+    subgraph SVC["@Service Layer"]
+      SV1["HolderService"]
+      SV2["AssetLaundryService"]
+      SV3["AccountingService"]
+      SV4["ReportService\nJasperReports 6.21"]
+      SV5["NotificationService\nSSE Emitter"]
+    end
+
+    subgraph REPO["Spring Data JPA — @Repository"]
+      R1["HolderRepository"]
+      R2["HolderAccountRepository"]
+      R3["AccountStatementRepository"]
+    end
+
+    subgraph DOMAIN["pradera-domain — Jakarta Persistence"]
+      DM1["Holder"]
+      DM2["HolderAccount"]
+      DM3["OperationSettlement"]
+    end
+
+    subgraph BATCH["Spring Batch"]
+      B1["HolderCreationJob"]
+      B2["AccountStateJob"]
+      B3["PlaftCrossInfoJob"]
+    end
+
+    subgraph INFRA["Infrastructure"]
+      I1["BcbSoapClient\nJAX-WS / Spring WS"]
+      I2["HubSpotFeignClient\nOpenFeign"]
+      I3["SftpGateway\nSpring Integration"]
+    end
+  end
+
+  DB2[("🗄️  PostgreSQL")]
+
+  BROWSER -->|HTTPS REST + SSE| SECURITY
+  SECURITY --> CTRL
+  CTRL --> SVC
+  SVC --> REPO
+  REPO --> DOMAIN
+  DOMAIN -->|JPA| DB2
+  SVC --> BATCH
+  SVC --> INFRA
+
+  style BROWSER fill:#0f1f35,stroke:#3b82f6,stroke-width:2px,color:#93c5fd
+  style PAGES   fill:#0d1a30,stroke:#3b82f6,color:#93c5fd
+  style SHARED  fill:#0d1a30,stroke:#3b82f6,color:#93c5fd
+  style STATE   fill:#0d1a30,stroke:#3b82f6,color:#93c5fd
+  style SB      fill:#0a1a15,stroke:#10b981,stroke-width:2px,color:#e2e8f0
+  style SECURITY fill:#1a1020,stroke:#8b5cf6,color:#c4b5fd
+  style CTRL    fill:#0d1a30,stroke:#3b82f6,color:#93c5fd
+  style SVC     fill:#0f2015,stroke:#10b981,color:#6ee7b7
+  style REPO    fill:#1a1505,stroke:#f59e0b,color:#fcd34d
+  style DOMAIN  fill:#1a0d25,stroke:#8b5cf6,color:#c4b5fd
+  style BATCH   fill:#1a1020,stroke:#ec4899,color:#f9a8d4
+  style INFRA   fill:#1a1505,stroke:#f59e0b,color:#fcd34d
+  style DB2     fill:#0d1a30,stroke:#60a5fa,color:#93c5fd
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       3. MÓDULOS — ANTES vs DESPUÉS
+  ══════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="sec-title">
+      <div class="num">3</div>
+      <div>
+        <h2>Mapeo de Módulos Maven</h2>
+        <p>Cómo cada módulo actual se transforma en el stack objetivo</p>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <!-- ACTUAL -->
+      <div>
+        <div class="card-header" style="color:var(--red);font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:1rem">
+          ❌ Stack Actual (Java EE 8 / javax.*)
+        </div>
+        <div style="display:flex;flex-direction:column;gap:.75rem">
+
+          <div class="module">
+            <div class="module-header">
+              <span class="module-name">iIntegration</span>
+              <span class="module-type type-jar">JAR</span>
+            </div>
+            <div class="module-desc">Interfaces, contratos, tipos base, JWT 0.7, Validaciones, ServiceException</div>
+            <div class="module-files">
+              <span class="file-tag">Auditable.java</span>
+              <span class="file-tag">JWTConstants.java</span>
+              <span class="file-tag">ServiceException.java</span>
+              <span class="file-tag">Validations.java</span>
+            </div>
+          </div>
+
+          <div class="module">
+            <div class="module-header">
+              <span class="module-name">iModel</span>
+              <span class="module-type type-jar">JAR</span>
+            </div>
+            <div class="module-desc">~300 entidades JPA con javax.persistence.* — Holder, HolderAccount, Settlement, Accounting, PLAFT, SMV</div>
+            <div class="module-files">
+              <span class="file-tag">Holder.java</span>
+              <span class="file-tag">HolderAccount.java</span>
+              <span class="file-tag">OperationSettlement.java</span>
+              <span class="file-tag">AccountingProcess.java</span>
+            </div>
+          </div>
+
+          <div class="module">
+            <div class="module-header">
+              <span class="module-name">iCoreFramework</span>
+              <span class="module-type type-jar">JAR</span>
+            </div>
+            <div class="module-desc">Batch propio (paralelo/secuencial), interceptor de auditoría, ProcessLogger</div>
+            <div class="module-files">
+              <span class="file-tag">BatchServiceBean</span>
+              <span class="file-tag">ParallelWorkManager</span>
+              <span class="file-tag">AuditProcessLoggerInterceptor</span>
+            </div>
+          </div>
+
+          <div class="module">
+            <div class="module-header">
+              <span class="module-name">iCommons</span>
+              <span class="module-type type-jar">JAR</span>
+            </div>
+            <div class="module-desc">JSF beans base, PrimeFaces utilities, SFTP/JSch, JasperReports, OkHttp, JWT</div>
+            <div class="module-files">
+              <span class="file-tag">GenericBaseBean</span>
+              <span class="file-tag">JSFUtilities</span>
+              <span class="file-tag">SftpService</span>
+              <span class="file-tag">PrimeFaces 6.2</span>
+            </div>
+          </div>
+
+          <div class="module">
+            <div class="module-header">
+              <span class="module-name">iCoreComponent</span>
+              <span class="module-type type-jar">JAR</span>
+            </div>
+            <div class="module-desc">SOAP Axis 1.4 (BCB/EDV), QR generator, PDFBox, componentes de cuentas</div>
+            <div class="module-files">
+              <span class="file-tag">ServiciosClienteBCB (Axis)</span>
+              <span class="file-tag">QrGenerator</span>
+              <span class="file-tag">AccountsFacade</span>
+            </div>
+          </div>
+
+          <div class="module" style="border-color:rgba(59,130,246,.3)">
+            <div class="module-header">
+              <span class="module-name">iAccounts</span>
+              <span class="module-type type-war">WAR</span>
+            </div>
+            <div class="module-desc">1.400+ archivos: MgmtBeans, Facades, Services, DAOs, Batch, HubSpot, JasperReports</div>
+            <div class="module-files">
+              <span class="file-tag">HolderMgmtBean</span>
+              <span class="file-tag">AssetLaundryBean</span>
+              <span class="file-tag">HolderServiceFacade</span>
+              <span class="file-tag">HolderAccountDAO</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- OBJETIVO -->
+      <div>
+        <div class="card-header" style="color:var(--green);font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:1rem">
+          ✅ Stack Objetivo (Spring Boot 3.x / Jakarta EE 10)
+        </div>
+        <div style="display:flex;flex-direction:column;gap:.75rem">
+
+          <div class="module" style="border-color:rgba(245,158,11,.25)">
+            <div class="module-header">
+              <span class="module-name">pradera-commons</span>
+              <span class="module-type type-new">LIB</span>
+            </div>
+            <div class="module-desc">iIntegration reempaquetado + Spring Security JWT 0.12 + ValidationUtils + Constants</div>
+            <div class="module-files">
+              <span class="file-tag">JwtTokenProvider</span>
+              <span class="file-tag">ServiceException</span>
+              <span class="file-tag">ValidationUtils</span>
+              <span class="file-tag" style="color:var(--amber)">jjwt 0.12</span>
+            </div>
+          </div>
+
+          <div class="module" style="border-color:rgba(139,92,246,.25)">
+            <div class="module-header">
+              <span class="module-name">pradera-domain</span>
+              <span class="module-type type-new">LIB</span>
+            </div>
+            <div class="module-desc">iModel migrado — solo cambio de javax → jakarta en anotaciones. Sin cambios de lógica.</div>
+            <div class="module-files">
+              <span class="file-tag" style="color:var(--green)">jakarta.persistence.*</span>
+              <span class="file-tag">Holder.java</span>
+              <span class="file-tag">HolderAccount.java</span>
+              <span class="file-tag">+297 entidades</span>
+            </div>
+          </div>
+
+          <div class="module" style="border-color:rgba(16,185,129,.25)">
+            <div class="module-header">
+              <span class="module-name">Spring Batch + AOP</span>
+              <span class="module-type type-new">MÓDULO</span>
+            </div>
+            <div class="module-desc">iCoreFramework → Spring Batch jobs (paralelo con ThreadPoolTaskExecutor) + @Around AOP</div>
+            <div class="module-files">
+              <span class="file-tag">HolderCreationJob</span>
+              <span class="file-tag">AccountStateJob</span>
+              <span class="file-tag">@AuditLog (AOP)</span>
+            </div>
+          </div>
+
+          <div class="module" style="border-color:rgba(6,182,212,.25)">
+            <div class="module-header">
+              <span class="module-name">pradera-commons-spring</span>
+              <span class="module-type type-new">LIB</span>
+            </div>
+            <div class="module-desc">iCommons sin JSF: SftpGateway (Spring Integration), ReportService (Jasper 6.21), mappers</div>
+            <div class="module-files">
+              <span class="file-tag">SftpGateway</span>
+              <span class="file-tag">ReportService</span>
+              <span class="file-tag" style="color:var(--red)">❌ GenericBaseBean</span>
+              <span class="file-tag" style="color:var(--red)">❌ JSFUtilities</span>
+            </div>
+          </div>
+
+          <div class="module" style="border-color:rgba(245,158,11,.25)">
+            <div class="module-header">
+              <span class="module-name">pradera-integration</span>
+              <span class="module-type type-new">LIB</span>
+            </div>
+            <div class="module-desc">iCoreComponent → clientes externos modernos: JAX-WS (SOAP), OpenFeign (REST), QR (ZXing)</div>
+            <div class="module-files">
+              <span class="file-tag">BcbSoapClient</span>
+              <span class="file-tag">HubSpotFeignClient</span>
+              <span class="file-tag">QrService (ZXing)</span>
+            </div>
+          </div>
+
+          <div class="module" style="border-color:rgba(59,130,246,.4)">
+            <div class="module-header">
+              <span class="module-name">pradera-app + pradera-web</span>
+              <span class="module-type type-war">APP</span>
+            </div>
+            <div class="module-desc">Spring Boot REST API + React SPA — Controllers, @Services, Repositories, Spring Security, React Query</div>
+            <div class="module-files">
+              <span class="file-tag">HolderController</span>
+              <span class="file-tag">PlaftController</span>
+              <span class="file-tag">HoldersPage.tsx</span>
+              <span class="file-tag">ServerDataTable.tsx</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       4. DEPENDENCIAS ENTRE MÓDULOS
+  ══════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="sec-title">
+      <div class="num">4</div>
+      <div>
+        <h2>Grafo de Dependencias</h2>
+        <p>Relaciones actuales vs objetivo entre módulos del sistema</p>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="mermaid-wrap">
+        <div style="text-align:center;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--red);margin-bottom:1rem">Stack Actual</div>
+        <div class="mermaid">
+graph TD
+  INT["iIntegration\n(JAR)"]
+  MOD["iModel\n(JAR)"]
+  FWK["iCoreFramework\n(JAR)"]
+  COM["iCommons\n(JAR)"]
+  CMP["iCoreComponent\n(JAR)"]
+  ACC["iAccounts\n(WAR)"]
+
+  INT --> MOD
+  INT --> FWK
+  INT --> COM
+  INT --> CMP
+  MOD --> ACC
+  FWK --> CMP
+  COM --> CMP
+  CMP --> ACC
+  FWK --> ACC
+  COM --> ACC
+
+  style INT fill:#1a2030,stroke:#3b82f6,color:#93c5fd
+  style MOD fill:#1a1530,stroke:#8b5cf6,color:#c4b5fd
+  style FWK fill:#1a2015,stroke:#10b981,color:#6ee7b7
+  style COM fill:#1a1505,stroke:#f59e0b,color:#fcd34d
+  style CMP fill:#1a1015,stroke:#ec4899,color:#f9a8d4
+  style ACC fill:#0d1a35,stroke:#60a5fa,stroke-width:3px,color:#bfdbfe
+        </div>
+      </div>
+      <div class="mermaid-wrap">
+        <div style="text-align:center;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--green);margin-bottom:1rem">Stack Objetivo</div>
+        <div class="mermaid">
+graph TD
+  CMN["pradera-commons\n(lib)"]
+  DOM["pradera-domain\n(lib)"]
+  INT2["pradera-integration\n(lib)"]
+  APP["pradera-app\n(Spring Boot)"]
+  WEB["pradera-web\n(React SPA)"]
+
+  CMN --> DOM
+  DOM --> APP
+  CMN --> APP
+  INT2 --> APP
+  APP -->|REST API| WEB
+
+  style CMN fill:#1a2030,stroke:#3b82f6,color:#93c5fd
+  style DOM fill:#1a1530,stroke:#8b5cf6,color:#c4b5fd
+  style INT2 fill:#1a1505,stroke:#f59e0b,color:#fcd34d
+  style APP fill:#0a1f15,stroke:#10b981,stroke-width:3px,color:#6ee7b7
+  style WEB fill:#0d1a35,stroke:#60a5fa,stroke-width:3px,color:#bfdbfe
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       5. TABLA DE MIGRACIÓN
+  ══════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="sec-title">
+      <div class="num">5</div>
+      <div>
+        <h2>Tabla de Conversión Tecnológica</h2>
+        <p>Equivalencia directa entre tecnologías actuales y objetivo</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <table class="mig-table">
+        <thead>
+          <tr>
+            <th>Componente Actual</th>
+            <th>Acción</th>
+            <th>Equivalente Objetivo</th>
+            <th>Notas</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>JSF 2.3 + PrimeFaces 6.2</code></td>
+            <td><span class="tag tag-del">Eliminar</span></td>
+            <td>React 18 + Ant Design / TanStack Table</td>
+            <td>331 páginas XHTML → componentes React</td>
+          </tr>
+          <tr>
+            <td><code>@Named @ViewScoped MgmtBean</code></td>
+            <td><span class="tag tag-del">Eliminar</span></td>
+            <td><code>RestController</code> + <code>useQuery</code> (React)</td>
+            <td>Lógica UI → React; lógica negocio → @Service</td>
+          </tr>
+          <tr>
+            <td><code>EJB @Stateless Facade</code></td>
+            <td><span class="tag tag-mod">Adaptar</span></td>
+            <td><code>@Service</code> (orquestación)</td>
+            <td>Sin cambio lógico, solo cambio de anotación</td>
+          </tr>
+          <tr>
+            <td><code>EJB @Stateless ServiceBean</code></td>
+            <td><span class="tag tag-mod">Adaptar</span></td>
+            <td><code>@Service @Transactional</code></td>
+            <td><code>@EJB</code> → <code>@Autowired</code> / constructor injection</td>
+          </tr>
+          <tr>
+            <td><code>CrudDaoServiceBean (DAO)</code></td>
+            <td><span class="tag tag-del">Eliminar</span></td>
+            <td><code>JpaRepository&lt;T, ID&gt;</code></td>
+            <td>JPQL queries → <code>@Query</code> en interfaces</td>
+          </tr>
+          <tr>
+            <td><code>javax.persistence.*</code></td>
+            <td><span class="tag tag-mod">Adaptar</span></td>
+            <td><code>jakarta.persistence.*</code></td>
+            <td>Script sed automatiza el cambio masivo</td>
+          </tr>
+          <tr>
+            <td><code>BatchServiceBean (propio)</code></td>
+            <td><span class="tag tag-del">Eliminar</span></td>
+            <td>Spring Batch + <code>ThreadPoolTaskExecutor</code></td>
+            <td>Jobs, Steps, Chunks con monitoreo nativo</td>
+          </tr>
+          <tr>
+            <td><code>jjwt 0.7 (sin Spring Security)</code></td>
+            <td><span class="tag tag-mod">Adaptar</span></td>
+            <td>Spring Security + jjwt 0.12</td>
+            <td>API completamente nueva; misma lógica de negocio</td>
+          </tr>
+          <tr>
+            <td><code>CDI Event&lt;NotificationEvent&gt;</code></td>
+            <td><span class="tag tag-del">Eliminar</span></td>
+            <td>Spring SSE (<code>SseEmitter</code>) + <code>EventSource</code> (JS)</td>
+            <td>Notificaciones browser en tiempo real</td>
+          </tr>
+          <tr>
+            <td><code>Apache Axis 1.4 (SOAP)</code></td>
+            <td><span class="tag tag-del">Eliminar</span></td>
+            <td>Spring WS / CXF + JAX-WS Jakarta</td>
+            <td>Regenerar stubs desde WSDL con wsimport</td>
+          </tr>
+          <tr>
+            <td><code>Jersey 1.x / RESTEasy</code></td>
+            <td><span class="tag tag-del">Eliminar</span></td>
+            <td>OpenFeign (<code>@FeignClient</code>)</td>
+            <td>Clientes REST declarativos</td>
+          </tr>
+          <tr>
+            <td><code>JSch (SFTP manual)</code></td>
+            <td><span class="tag tag-del">Eliminar</span></td>
+            <td>Spring Integration SFTP Gateway</td>
+            <td>Configuración DSL; sin código boilerplate</td>
+          </tr>
+          <tr>
+            <td><code>JasperReports 6.11</code></td>
+            <td><span class="tag tag-keep">Mantener</span></td>
+            <td>JasperReports 6.21 + <code>@Service</code></td>
+            <td>Upgrade de versión; .jasper files sin cambios</td>
+          </tr>
+          <tr>
+            <td><code>PrimeFaces DataTable (lazy)</code></td>
+            <td><span class="tag tag-del">Eliminar</span></td>
+            <td><code>ServerDataTable</code> (TanStack Table)</td>
+            <td>Paginación server-side nativa</td>
+          </tr>
+          <tr>
+            <td><code>WildFly / JBoss</code></td>
+            <td><span class="tag tag-del">Eliminar</span></td>
+            <td>Docker + Nginx + Spring Boot JAR</td>
+            <td>Embedded Tomcat, contenedor autónomo</td>
+          </tr>
+          <tr>
+            <td><code>DeltaSpike / OmniFaces</code></td>
+            <td><span class="tag tag-del">Eliminar</span></td>
+            <td>Spring AOP + React hooks</td>
+            <td>No tienen equivalente directo; reemplazar por funcionalidad</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       6. PATRONES DE MIGRACIÓN
+  ══════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="sec-title">
+      <div class="num">6</div>
+      <div>
+        <h2>Patrones de Migración Clave</h2>
+        <p>Los 4 cambios de código más críticos con ejemplos concretos</p>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:1.5rem">
+
+      <!-- Pattern 1 -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon" style="background:rgba(239,68,68,.15)">🔴</div>
+          Patrón 1 — EJB DAO → Spring Data JPA Repository
+        </div>
+        <div class="pattern-grid">
+          <div class="pattern-card">
+            <div class="pattern-label before">❌ Antes (Java EE)</div>
+            <pre><span class="an">@Stateless</span>
+<span class="an">@TransactionAttribute</span>(<span class="cl">REQUIRED</span>)
+<span class="kw">public class</span> <span class="cl">HolderAccountDAO</span>
+    <span class="kw">extends</span> <span class="cl">CrudDaoServiceBean</span> {
+
+  <span class="an">@Inject</span>
+  <span class="kw">private</span> <span class="cl">UserInfo</span> userInfo;
+
+  <span class="kw">public</span> List&lt;<span class="cl">HolderAccount</span>&gt; allByParticipant(
+      <span class="cl">Participant</span> p,
+      <span class="cl">HolderAccountStatusType</span>... s) {
+
+    StringBuilder q = <span class="kw">new</span> <span class="cl">StringBuilder</span>();
+    q.append(<span class="st">"SELECT ha FROM HolderAccount ha "</span>);
+    q.append(<span class="st">"WHERE ha.participant=:P"</span>);
+    <span class="cm">// params map, listByQueryString()</span>
+    <span class="kw">return</span> <span class="kw">super</span>.listByQueryString(q, params);
+  }
+}</pre>
+          </div>
+          <div class="pattern-card">
+            <div class="pattern-label after">✅ Después (Spring Boot)</div>
+            <pre><span class="an">@Repository</span>
+<span class="kw">public interface</span> <span class="cl">HolderAccountRepository</span>
+    <span class="kw">extends</span> <span class="cl">JpaRepository</span>&lt;<span class="cl">HolderAccount</span>, <span class="cl">Long</span>&gt; {
+
+  <span class="an">@Query</span>(<span class="st">"""
+    SELECT ha FROM HolderAccount ha
+    JOIN ha.participant p
+    WHERE p.idParticipantPk = :id
+    AND (:#{#states == null} = true
+         OR ha.stateAccount IN :states)
+    """</span>)
+  List&lt;<span class="cl">HolderAccount</span>&gt; findByParticipant(
+    <span class="an">@Param</span>(<span class="st">"id"</span>) Long participantId,
+    <span class="an">@Param</span>(<span class="st">"states"</span>) List&lt;Integer&gt; states
+  );
+}</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pattern 2 -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon" style="background:rgba(239,68,68,.15)">🔴</div>
+          Patrón 2 — JSF MgmtBean (@ViewScoped) → REST Controller + React Page
+        </div>
+        <div class="pattern-grid">
+          <div class="pattern-card">
+            <div class="pattern-label before">❌ Antes — HolderMgmtBean.java</div>
+            <pre><span class="an">@Named</span> <span class="an">@ViewScoped</span>
+<span class="kw">public class</span> <span class="cl">HolderMgmtBean</span>
+    <span class="kw">extends</span> <span class="cl">GenericBaseBean</span> {
+
+  <span class="an">@EJB</span> <span class="kw">private</span> <span class="cl">HolderServiceFacade</span> facade;
+  <span class="kw">private</span> List&lt;<span class="cl">Holder</span>&gt; holderList;
+
+  <span class="an">@PostConstruct</span>
+  <span class="kw">public void</span> init() {
+    holderList = facade.findAll();
+  }
+
+  <span class="kw">public void</span> save() {
+    facade.save(selectedHolder);
+    <span class="cl">JSFUtilities</span>.addMessage(<span class="st">"OK"</span>);
+  }
+}</pre>
+          </div>
+          <div class="pattern-card">
+            <div class="pattern-label after">✅ Después — HolderController.java</div>
+            <pre><span class="an">@RestController</span>
+<span class="an">@RequestMapping</span>(<span class="st">"/api/v1/holders"</span>)
+<span class="an">@RequiredArgsConstructor</span>
+<span class="kw">public class</span> <span class="cl">HolderController</span> {
+
+  <span class="kw">private final</span> <span class="cl">HolderService</span> holderService;
+
+  <span class="an">@GetMapping</span>
+  <span class="kw">public</span> Page&lt;<span class="cl">HolderDTO</span>&gt; search(
+      <span class="an">@ModelAttribute</span> <span class="cl">HolderSearchDTO</span> filter,
+      <span class="cl">Pageable</span> pageable) {
+    <span class="kw">return</span> holderService.search(filter, pageable);
+  }
+
+  <span class="an">@PostMapping</span>
+  <span class="an">@ResponseStatus</span>(<span class="cl">CREATED</span>)
+  <span class="kw">public</span> <span class="cl">HolderDTO</span> create(
+      <span class="an">@Valid</span> <span class="an">@RequestBody</span> <span class="cl">HolderRequestDTO</span> dto) {
+    <span class="kw">return</span> holderService.create(dto);
+  }
+}</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pattern 3 -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon" style="background:rgba(245,158,11,.15)">🟡</div>
+          Patrón 3 — Batch Propio → Spring Batch
+        </div>
+        <div class="pattern-grid">
+          <div class="pattern-card">
+            <div class="pattern-label before">❌ Antes — BatchServiceBean (EJB)</div>
+            <pre><span class="an">@Stateless</span>
+<span class="kw">public class</span> <span class="cl">HolderCreationProcessBatch</span> {
+
+  <span class="an">@EJB</span> <span class="kw">private</span> <span class="cl">BatchServiceBean</span> batchSvc;
+  <span class="an">@EJB</span> <span class="kw">private</span> <span class="cl">HolderServiceBean</span> holderSvc;
+
+  <span class="kw">public void</span> execute(
+      List&lt;<span class="cl">MassiveHolderTO</span>&gt; holders) {
+
+    batchSvc.executeParallel(
+      holders,
+      holder -> holderSvc.create(holder)
+    );
+  }
+}</pre>
+          </div>
+          <div class="pattern-card">
+            <div class="pattern-label after">✅ Después — Spring Batch Job</div>
+            <pre><span class="an">@Configuration</span>
+<span class="an">@RequiredArgsConstructor</span>
+<span class="kw">public class</span> <span class="cl">HolderCreationJobConfig</span> {
+
+  <span class="an">@Bean</span>
+  <span class="kw">public</span> Step holderCreationStep() {
+    <span class="kw">return new</span> <span class="cl">StepBuilder</span>(<span class="st">"holderStep"</span>, repo)
+      .&lt;<span class="cl">HolderDTO</span>, <span class="cl">Holder</span>&gt;chunk(<span class="st">50</span>, tx)
+      .reader(holderReader())
+      .processor(holderProcessor())
+      .writer(holderWriter())
+      .taskExecutor(taskExecutor()) <span class="cm">// paralelo</span>
+      .build();
+  }
+
+  <span class="an">@Bean</span>
+  <span class="kw">public</span> <span class="cl">TaskExecutor</span> taskExecutor() {
+    <span class="kw">var</span> exec = <span class="kw">new</span> <span class="cl">ThreadPoolTaskExecutor</span>();
+    exec.setCorePoolSize(<span class="st">4</span>);
+    <span class="kw">return</span> exec;
+  }
+}</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pattern 4 -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon" style="background:rgba(16,185,129,.15)">🟢</div>
+          Patrón 4 — JSF PrimeFaces DataTable → React ServerDataTable
+        </div>
+        <div class="pattern-grid">
+          <div class="pattern-card">
+            <div class="pattern-label before">❌ Antes — XHTML PrimeFaces</div>
+            <pre><span class="cm">&lt;!-- holders.xhtml --&gt;</span>
+&lt;p:dataTable
+  value="#{holderMgmtBean.lazyModel}"
+  lazy="true"
+  paginator="true"
+  rows="20"
+  paginatorTemplate="..."&gt;
+
+  &lt;p:column headerText="Nombre"&gt;
+    #{holder.fullName}
+  &lt;/p:column&gt;
+  &lt;p:column headerText="Documento"&gt;
+    #{holder.documentNumber}
+  &lt;/p:column&gt;
+  &lt;p:column&gt;
+    &lt;p:commandButton
+      action="#{holderMgmtBean.edit}"
+      value="Editar" ajax="true"/&gt;
+  &lt;/p:column&gt;
+&lt;/p:dataTable&gt;</pre>
+          </div>
+          <div class="pattern-card">
+            <div class="pattern-label after">✅ Después — React + TanStack Table</div>
+            <pre><span class="cm">// HoldersPage.tsx</span>
+<span class="kw">const</span> <span class="cl">HoldersPage</span> = () =&gt; {
+  <span class="kw">const</span> { data, isLoading } = useQuery({
+    queryKey: [<span class="st">'holders'</span>, filter],
+    queryFn: () =&gt; holdersApi.search(filter),
+  });
+
+  <span class="kw">const</span> columns = [
+    columnHelper.accessor(<span class="st">'fullName'</span>, {
+      header: <span class="st">'Nombre'</span>,
+    }),
+    columnHelper.accessor(<span class="st">'documentNumber'</span>, {
+      header: <span class="st">'Documento'</span>,
+    }),
+    columnHelper.display({
+      id: <span class="st">'actions'</span>,
+      cell: (row) =&gt; &lt;<span class="cl">EditButton</span>
+        onClick={() =&gt; openEdit(row)} /&gt;
+    }),
+  ];
+
+  <span class="kw">return</span> &lt;<span class="cl">ServerDataTable</span>
+    data={data?.content}
+    loading={isLoading}
+    columns={columns} /&gt;;
+};</pre>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       7. CRONOGRAMA
+  ══════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="sec-title">
+      <div class="num">7</div>
+      <div>
+        <h2>Cronograma de Migración</h2>
+        <p>16 semanas organizadas en 6 fases con entregables por fase</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="timeline">
+
+        <div class="tl-item">
+          <div class="tl-label">
+            <div class="phase">Fase 0</div>
+            <span class="weeks">Semanas 1–2</span>
+          </div>
+          <div class="tl-bar-wrap">
+            <div class="tl-bar bar-0" style="width:12%">Preparación e Infraestructura</div>
+            <div class="tl-tags">
+              <span class="tag tag-new2">Repos Git</span>
+              <span class="tag tag-new2">Parent POM</span>
+              <span class="tag tag-new2">Vite + React</span>
+              <span class="tag tag-new2">OpenAPI spec</span>
+              <span class="tag tag-new2">CI/CD GitHub Actions</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-label">
+            <div class="phase">Fase 1</div>
+            <span class="weeks">Semanas 2–3</span>
+          </div>
+          <div class="tl-bar-wrap">
+            <div class="tl-bar bar-1" style="width:20%">iModel → pradera-domain (javax→jakarta)</div>
+            <div class="tl-tags">
+              <span class="tag tag-mod">Script sed masivo</span>
+              <span class="tag tag-mod">Jakarta Persistence</span>
+              <span class="tag tag-keep">Sin cambio lógico</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-label">
+            <div class="phase">Fase 2</div>
+            <span class="weeks">Semanas 3–6</span>
+          </div>
+          <div class="tl-bar-wrap">
+            <div class="tl-bar bar-2" style="width:40%">Backend Core: Auth + Holders + Accounts API</div>
+            <div class="tl-tags">
+              <span class="tag tag-new2">Spring Security + JWT</span>
+              <span class="tag tag-new2">HolderRepository</span>
+              <span class="tag tag-new2">HolderController</span>
+              <span class="tag tag-new2">AccountController</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-label">
+            <div class="phase">Fase 3</div>
+            <span class="weeks">Semanas 7–10</span>
+          </div>
+          <div class="tl-bar-wrap">
+            <div class="tl-bar bar-3" style="width:65%">Backend Avanzado: PLAFT + Settlement + Spring Batch</div>
+            <div class="tl-tags">
+              <span class="tag tag-new2">PlaftController</span>
+              <span class="tag tag-new2">AssetLaundryService</span>
+              <span class="tag tag-new2">HolderCreationJob</span>
+              <span class="tag tag-new2">AccountStateJob</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-label">
+            <div class="phase">Fase 4</div>
+            <span class="weeks">Semanas 4–13</span>
+          </div>
+          <div class="tl-bar-wrap">
+            <div class="tl-bar bar-4" style="width:85%">Frontend React (paralelo al backend)</div>
+            <div class="tl-tags">
+              <span class="tag tag-new2">HoldersPage</span>
+              <span class="tag tag-new2">PlaftPage</span>
+              <span class="tag tag-new2">ServerDataTable</span>
+              <span class="tag tag-new2">SSE Notificaciones</span>
+              <span class="tag tag-new2">331 pantallas</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-label">
+            <div class="phase">Fase 5</div>
+            <span class="weeks">Semanas 10–13</span>
+          </div>
+          <div class="tl-bar-wrap">
+            <div class="tl-bar bar-5" style="width:80%">Integraciones Externas: SOAP + HubSpot + SFTP + Jasper</div>
+            <div class="tl-tags">
+              <span class="tag tag-mod">Axis 1.4 → CXF</span>
+              <span class="tag tag-mod">Jersey → OpenFeign</span>
+              <span class="tag tag-mod">JSch → Spring SFTP</span>
+              <span class="tag tag-keep">JasperReports 6.21</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-label">
+            <div class="phase">Fase 6</div>
+            <span class="weeks">Semanas 14–16</span>
+          </div>
+          <div class="tl-bar-wrap">
+            <div class="tl-bar bar-6" style="width:100%">Docker · QA · UAT · Go-Live</div>
+            <div class="tl-tags">
+              <span class="tag tag-new2">Dockerfiles multi-stage</span>
+              <span class="tag tag-new2">docker-compose</span>
+              <span class="tag tag-new2">Nginx proxy</span>
+              <span class="tag tag-keep">UAT con usuarios</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       8. RIESGOS
+  ══════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="sec-title">
+      <div class="num">8</div>
+      <div>
+        <h2>Riesgos y Mitigaciones</h2>
+        <p>Principales riesgos técnicos identificados durante el análisis del código</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <table class="mig-table">
+        <thead>
+          <tr>
+            <th>Riesgo</th>
+            <th>Impacto</th>
+            <th>Mitigación</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="risk-high">
+            <td>Axis 1.4 SOAP: WSDL de BCB/EDV no disponible o deprecado</td>
+            <td><span class="tag tag-del">Alto</span></td>
+            <td>Obtener WSDLs antes de Fase 5; mockear con WireMock en tests</td>
+          </tr>
+          <tr class="risk-high">
+            <td>iModel: entidades con lógica de negocio embebida en métodos</td>
+            <td><span class="tag tag-del">Alto</span></td>
+            <td>Auditar cada entidad antes de migrar; extraer lógica a @Service</td>
+          </tr>
+          <tr class="risk-high">
+            <td>Transacciones distribuidas EJB (TX propagation entre Facades)</td>
+            <td><span class="tag tag-del">Alto</span></td>
+            <td>Mapear explícitamente @Transactional(propagation=X) en todos los @Service</td>
+          </tr>
+          <tr class="risk-med">
+            <td>331 páginas XHTML: priorización incorrecta del desarrollo React</td>
+            <td><span class="tag tag-mod">Medio</span></td>
+            <td>Mapear cada XHTML a ruta React antes de comenzar Fase 4</td>
+          </tr>
+          <tr class="risk-med">
+            <td>CrudDaoServiceBean: métodos auxiliares propios no en JpaRepository</td>
+            <td><span class="tag tag-mod">Medio</span></td>
+            <td>Implementar como default methods en interfaces custom extendidas</td>
+          </tr>
+          <tr class="risk-med">
+            <td>JWT custom (UserInfo EJB @SessionScoped) → Spring Security principal</td>
+            <td><span class="tag tag-mod">Medio</span></td>
+            <td>Migrar UserInfo a UserDetails de Spring Security desde Fase 2</td>
+          </tr>
+          <tr class="risk-low">
+            <td>JasperReports 6.11 → 6.21: cambios menores en API de exportación</td>
+            <td><span class="tag tag-keep">Bajo</span></td>
+            <td>Test de regresión de reportes críticos (UIF, SMV) en staging</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── FOOTER ── -->
+  <footer>
+    <p>📐 iDepositary Migration Plan · React 18 + Spring Boot 3.x</p>
+    <p style="margin-top:.4rem">Generado por Claude Sonnet 4.6 — Arquitecto de Software · 2026-04-28</p>
+  </footer>
+
+</div><!-- /page -->
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'dark',
+    themeVariables: {
+      primaryColor:        '#1e3a5f',
+      primaryTextColor:    '#e2e8f0',
+      primaryBorderColor:  '#3b82f6',
+      lineColor:           '#475569',
+      secondaryColor:      '#1a2535',
+      tertiaryColor:       '#0f1a2e',
+      background:          '#0b0f1a',
+      mainBkg:             '#111827',
+      nodeBorder:          '#3b82f6',
+      clusterBkg:          '#111827',
+      titleColor:          '#f1f5f9',
+      edgeLabelBackground: '#1e293b',
+      fontSize:            '13px',
+    },
+    flowchart: {
+      curve: 'basis',
+      nodeSpacing: 40,
+      rankSpacing: 60,
+      padding: 15,
+    },
+    securityLevel: 'loose',
+  });
+</script>
+</body>
+</html>
