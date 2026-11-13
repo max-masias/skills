@@ -6,6 +6,7 @@ Skills de [Claude Code](https://claude.com/claude-code) para tareas recurrentes 
 
 1. Clonar el repositorio y abrir la carpeta completa en Claude Code (terminal, VS Code/Antigravity o app de escritorio).
 2. Instalar las dependencias de Python: `python -m pip install -r requirements.txt`
+   - Para `/parsear-documento`: en PowerShell, `powershell -ExecutionPolicy Bypass -File .\configurar_parsear_documento.ps1`. Instala Python y las librerías si faltan, crea `.claude/skills/parsear-documento/.env` y abre el Bloc de notas para pegar la clave propia de LlamaCloud. Guía paso a paso (cuenta, clave, configurador y primera prueba) en la sección 4.13 de `INSTRUCCIONES_SKILLS.txt`.
 3. En el chat, escribir `/` para ver las skills, o pedir la tarea con palabras.
 
 Las instrucciones detalladas de cada skill (qué hace, dónde dejar los archivos y dónde sale el resultado) están en **[INSTRUCCIONES_SKILLS.txt](INSTRUCCIONES_SKILLS.txt)**.
@@ -20,6 +21,7 @@ Las instrucciones detalladas de cada skill (qué hace, dónde dejar los archivos
 | `/cage-analisis` | Análisis CAGE de distancia entre mercados |
 | `/create-icp` | Perfil de cliente ideal a partir de un CAGE |
 | `/docx-a-markdown` | Word → Markdown |
+| `/parsear-documento` | PDF escaneados, imágenes y documentos complejos → Markdown con LlamaParse |
 | `/prepare-landing` | Landing de Tedregal desde un Word |
 | `/frontend-tedregal` | Páginas y componentes con la marca de Tedregal |
 | `/frontend-design` | Interfaces web con diseño cuidado (skill pública de Anthropic) |
@@ -33,6 +35,7 @@ Las instrucciones detalladas de cada skill (qué hace, dónde dejar los archivos
 .claude/skills/            las skills
 Generador_facturas_AWS/    entradas y salidas de factura-aws-acres
 Generador_informes_MD/     entradas y salidas de informe-desde-md
+Parsear_documentos/        entradas y salidas de parsear-documento
 entradas/                  archivos de entrada del resto de skills
 salidas/                   resultados, una subcarpeta por skill
 ```

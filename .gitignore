@@ -25,3 +25,15 @@ Generador_informes_MD/Informe_generado/_trabajo/
 
 # Registro local de la reorganización
 REORGANIZACION.txt
+
+# Claves personales (cada persona crea su .env desde plantilla_env.txt)
+.env
+
+# Registro local de consumo de créditos de LlamaParse (es de cada cuenta)
+.llamaparse/
+
+# Documentos de parsear-documento (pueden ser de clientes): solo se suben las carpetas vacías
+Parsear_documentos/Documentos_entrada/*
+!Parsear_documentos/Documentos_entrada/.gitkeep
+Parsear_documentos/Documentos_parseados/*
+!Parsear_documentos/Documentos_parseados/.gitkeep

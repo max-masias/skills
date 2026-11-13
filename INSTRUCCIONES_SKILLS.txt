@@ -18,8 +18,8 @@ CONTENIDO
 Una "skill" es un paquete de instrucciones (y a veces scripts) que le enseña
 a Claude Code a hacer una tarea concreta siempre de la misma forma.
 
-  Prueba Skills Claude\
-  |-- .claude\skills\            Las 12 skills (una carpeta por skill)
+  Claude_skills\                (carpeta del repositorio; puede tener otro nombre)
+  |-- .claude\skills\            Las 13 skills (una carpeta por skill)
   |-- Generador_facturas_AWS\    Proyecto de la skill factura-aws-acres
   |   |-- Comprobantes_AWS\        -> aquí van los PDF de AWS
   |   |-- Datos_Factura\           -> datos del emisor, de ACRES y numeración
@@ -27,6 +27,9 @@ a Claude Code a hacer una tarea concreta siempre de la misma forma.
   |-- Generador_informes_MD\     Proyecto de la skill informe-desde-md
   |   |-- Archivos_MD\             -> aquí van los .md de entrada
   |   |-- Informe_generado\        -> aquí salen los informes
+  |-- Parsear_documentos\        Proyecto de la skill parsear-documento
+  |   |-- Documentos_entrada\      -> aquí van los documentos a parsear
+  |   |-- Documentos_parseados\    -> aquí salen los .md resultantes
   |-- entradas\                  Archivos de entrada del resto de skills
   |                                (Word, PDF de requerimientos, etc.)
   |-- salidas\                   Resultados, una subcarpeta por skill
@@ -34,6 +37,9 @@ a Claude Code a hacer una tarea concreta siempre de la misma forma.
   |                                que se cambien las skills)
   |-- INSTRUCCIONES_SKILLS.txt   Este archivo
   |-- requirements.txt           Librerías de Python necesarias
+  |-- plantilla_env.txt          Modelo del .env de parsear-documento (el .env real
+  |                                queda en .claude\skills\parsear-documento\ y
+  |                                no se sube a GitHub)
 
 Regla general: lo que se le da a una skill va en su carpeta de entrada y
 lo que produce aparece en su carpeta de salida. Nunca se escribe nada
@@ -50,15 +56,18 @@ a) Claude Code: en la terminal, en VS Code / Antigravity (extensión de
 b) Python 3.10 o superior (python.org o Anaconda). Comprobar en una
    terminal:   python --version
 
-c) Librerías: abrir una terminal en la carpeta "Prueba Skills Claude" y
+c) Librerías: abrir una terminal en la carpeta del repositorio y
    ejecutar:
        python -m pip install -r requirements.txt
    (si "python" no funciona, probar con "py").
 
-d) Opcional: pandoc (https://pandoc.org) mejora la conversión de Word a
+d) Solo para /parsear-documento: seguir la guía paso a paso de la sección
+   4.13 (un comando que instala todo y pide pegar la clave de LlamaCloud).
+
+e) Opcional: pandoc (https://pandoc.org) mejora la conversión de Word a
    Markdown. Sin pandoc la skill docx-a-markdown funciona igual.
 
-e) Abrir SIEMPRE la carpeta "Prueba Skills Claude" completa en el editor
+f) Abrir SIEMPRE la carpeta del repositorio completa en el editor
    (no una subcarpeta). Así Claude Code carga las skills y el CLAUDE.md.
 
 
@@ -237,12 +246,117 @@ Pedir    : /revisar-ingles  y pegar el texto
 Resultado: en el mismo chat (no crea archivos)
 
 
+..........................................................................
+4.13 /parsear-documento  -  Documentos difíciles a Markdown con LlamaParse
+..........................................................................
+Qué hace : Sube el documento a LlamaParse (servicio en la nube de
+           LlamaIndex) y devuelve su contenido en Markdown o texto. Sirve
+           para PDF escaneados, fotos de documentos, tablas complejas,
+           PowerPoint y Excel. Antes de subir nada calcula cuántos
+           créditos costará y se detiene si se pasaría del límite del mes.
+Antes    : Configuración, una sola vez por equipo (unos 10 minutos).
+           Ver la guía paso a paso justo debajo.
+Pedir    : /parsear-documento   (procesa los documentos de
+           Documentos_entrada que todavía no tienen resultado)
+           /parsear-documento @ruta/archivo.pdf   -> un archivo concreto
+           "¿cuánto costaría?"            -> solo estima, no gasta créditos
+           "¿cuántos créditos me quedan?" -> muestra el consumo del mes
+Resultado: Parsear_documentos\Documentos_parseados\<archivo>.md
+           (nunca sobrescribe: si se repite, crea <archivo>_v2.md)
+Créditos : El plan gratuito trae 10.000 créditos por mes (no se acumulan).
+           Costo por página: fast 1 · cost_effective 3 · agentic 10 ·
+           agentic_plus 25. Con 10.000 créditos alcanzan, por ejemplo,
+           ~3.300 páginas de documentos digitales o 1.000 escaneadas.
+           Re-parsear el mismo archivo dentro de 48 h no cuesta.
+           La skill registra lo gastado en .llamaparse\consumo.csv (solo
+           lo hecho con esta skill en este equipo; el saldo oficial está en
+           cloud.llamaindex.ai).
+Notas    : El documento se sube a los servidores de LlamaIndex (quedan en
+           caché 48 h, no se usan para entrenar modelos y la skill borra el
+           archivo al terminar). Confirmar que está permitido antes de
+           subir documentos de clientes. Para un Word sencillo,
+           /docx-a-markdown es gratis y no sube nada.
+
+  CONFIGURACIÓN DE /parsear-documento - PASO A PASO (una sola vez)
+  -----------------------------------------------------------------
+
+  Paso 1. Traer la última versión del repositorio
+          Si es la primera vez:  git clone https://github.com/chriscev/Claude_skills.git
+          Si ya lo tenías:       git pull      (dentro de la carpeta del repositorio)
+
+  Paso 2. Crear la cuenta de LlamaCloud (plan gratuito)
+          - Entrar a https://cloud.llamaindex.ai y registrarse (con Google,
+            GitHub o correo). Región: dejar la de Norteamérica (NA), salvo
+            que se necesite Europa (https://cloud.eu.llamaindex.ai). La
+            región no se puede cambiar después.
+          - El plan gratuito ("Pay as you go") trae 10.000 créditos al mes.
+
+  Paso 3. Crear la clave (API key)
+          - En el menú izquierdo: API Key -> Generate New Key -> escribir un
+            nombre (p. ej. "skills-claude") -> Create new key.
+          - Copiar la clave (empieza con "llx-"). Se muestra UNA sola vez;
+            si se pierde, se crea otra.
+          - La clave es personal: no se comparte, no se pega en chats y no
+            se muestra en capturas de pantalla.
+
+  Paso 4. Ejecutar el configurador
+          - Abrir PowerShell (menú Inicio -> escribir "PowerShell" -> Enter).
+          - Ir a la carpeta del repositorio (cambiar la ruta por la propia):
+                cd "C:\ruta\a\Claude_skills"
+          - Ejecutar:
+                powershell -ExecutionPolicy Bypass -File .\configurar_parsear_documento.ps1
+          El configurador hace solo:
+            a) Instala Python 3.12 si no está (con winget o desde python.org,
+               sin pedir permisos de administrador). Tarda unos minutos.
+            b) Instala las librerías de requirements.txt.
+            c) Crea el archivo .claude\skills\parsear-documento\.env a partir
+               de plantilla_env.txt.
+            d) Abre ese .env en el Bloc de notas.
+
+  Paso 5. Pegar la clave
+          - En el Bloc de notas, en la línea
+                LLAMA_CLOUD_API_KEY=llx-pega-aqui-tu-clave
+            reemplazar  llx-pega-aqui-tu-clave  por la clave propia. Debe
+            quedar  LLAMA_CLOUD_API_KEY=llx-...  sin comillas ni espacios.
+          - Guardar (Ctrl+S) y cerrar esa pestaña del Bloc de notas.
+          - Si el configurador se queda esperando (pasa cuando el Bloc de
+            notas tiene otras pestañas abiertas), cerrar la PowerShell, abrir
+            otra y repetir el Paso 4: ya no pedirá la clave.
+
+  Paso 6. Comprobar el resultado
+          Al final, el configurador muestra en verde:
+              Python y librerías: OK
+              Clave encontrada: llx-...XXXX (NN caracteres)
+              .env excluido de GitHub: OK
+              Listo. Copia un documento en Parsear_documentos\Documentos_entrada\ ...
+          Si algo sale en rojo o amarillo, corregirlo y repetir el Paso 4.
+          Se puede ejecutar todas las veces que haga falta: no borra nada
+          ni cambia una clave ya guardada.
+
+  Paso 7. Primera prueba
+          - Copiar un documento corto (1-2 páginas) en
+            Parsear_documentos\Documentos_entrada\
+          - Abrir la carpeta del repositorio en Claude Code y empezar un chat
+            NUEVO (para que cargue la skill).
+          - Escribir:  ¿cuánto costaría parsear los documentos?   (no gasta)
+          - Escribir:  /parsear-documento
+          - El resultado aparece en Parsear_documentos\Documentos_parseados\
+          - El saldo oficial se ve en cloud.llamaindex.ai.
+
+  Qué NO se sube a GitHub (lo excluye .gitignore):
+          - .claude\skills\parsear-documento\.env (la clave)
+          - .llamaparse\ (registro local de consumo)
+          - el contenido de Documentos_entrada y Documentos_parseados
+
+
+
+
 --------------------------------------------------------------------------
 5. PROBLEMAS FRECUENTES
 --------------------------------------------------------------------------
 
 - No aparece la skill al escribir "/":
-  abrir la carpeta "Prueba Skills Claude" completa (no una subcarpeta) y
+  abrir la carpeta del repositorio completa (no una subcarpeta) y
   empezar un chat nuevo.
 
 - "No module named ..." o falta una librería:
@@ -253,6 +367,28 @@ Resultado: en el mismo chat (no crea archivos)
 
 - La factura sale como BORRADOR:
   quedan campos [COMPLETAR] en Generador_facturas_AWS\Datos_Factura\.
+
+- /parsear-documento dice "Falta la clave de LlamaCloud":
+  falta el archivo .claude\skills\parsear-documento\.env o la línea
+  LLAMA_CLOUD_API_KEY=llx-...; volver a ejecutar
+  configurar_parsear_documento.ps1 (ver 4.13, Paso 4).
+
+- El configurador dice "Falta Python" o "No se pudo instalar Python":
+  instalar Python desde https://www.python.org/downloads/ marcando
+  "Add python.exe to PATH", abrir una PowerShell NUEVA y repetir el Paso 4.
+
+- PowerShell dice "la ejecución de scripts está deshabilitada":
+  usar el comando completo con  -ExecutionPolicy Bypass  (Paso 4); no hace
+  falta cambiar ninguna configuración de Windows.
+
+- /parsear-documento da error 401 (clave no válida):
+  la clave está mal copiada o fue eliminada; crear otra (Paso 3) y
+  reemplazarla en el .env (Paso 5). Si la cuenta es de Europa, quitar el #
+  de la línea LLAMA_CLOUD_BASE_URL del .env.
+
+- /parsear-documento se detiene por presupuesto:
+  se acabaron los créditos del mes; usar menos páginas (--paginas), un
+  tier más barato o esperar al día 1 del mes siguiente.
 
 - Claude pide permiso para ejecutar comandos:
   es normal la primera vez; se puede elegir "permitir siempre" para los

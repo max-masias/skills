@@ -1,5 +1,6 @@
 # Dependencias de Python de las skills (python -m pip install -r requirements.txt)
-pdfplumber>=0.10      # factura-aws-acres: lectura de los PDF de AWS
+pdfplumber>=0.10      # factura-aws-acres y parsear-documento: lectura de PDF
 reportlab>=4.0        # factura-aws-acres: generación de la factura en PDF
 markdown>=3.4         # informe-desde-md, propuesta-proyecto: Markdown -> HTML/Word
 python-docx>=1.1      # informe-desde-md, propuesta-proyecto, docx-a-markdown, prepare-landing: Word
+llama-cloud>=2.8      # parsear-documento: SDK oficial de LlamaParse (LlamaCloud)

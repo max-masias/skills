@@ -1,0 +1,15 @@
+# Modelo del .env de la skill parsear-documento (.claude\skills\parsear-documento\.env).
+# No lo copies a mano: ejecuta  powershell -ExecutionPolicy Bypass -File .\configurar_parsear_documento.ps1
+# El archivo .env NO se sube a GitHub: cada persona usa su propia clave.
+
+# Clave de LlamaCloud: cloud.llamaindex.ai -> API Key -> Generate New Key
+LLAMA_CLOUD_API_KEY=llx-pega-aqui-tu-clave
+
+# Solo si tu cuenta es de la región Europa (cloud.eu.llamaindex.ai):
+# LLAMA_CLOUD_BASE_URL=https://api.cloud.eu.llamaindex.ai
+
+# Presupuesto mensual de créditos para la skill parsear-documento (plan gratuito: 10000)
+LLAMAPARSE_CREDITOS_MES=10000
+
+# Versión del motor de LlamaParse ("latest" o una fecha publicada, p. ej. 2026-07-24)
+LLAMAPARSE_VERSION=latest
