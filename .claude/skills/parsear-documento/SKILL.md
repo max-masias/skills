@@ -1,6 +1,6 @@
 ---
 name: parsear-documento
-description: Convierte documentos difíciles (PDF escaneados o con tablas complejas, Word, PowerPoint, Excel, imágenes) a Markdown o texto con LlamaParse, el servicio en la nube de LlamaIndex, controlando que el consumo no supere los créditos gratis del mes. Toma los documentos de Parsear_documentos/Documentos_entrada y deja los resultados en Parsear_documentos/Documentos_parseados. Úsala cuando el usuario pida parsear, extraer o convertir el contenido de un documento con LlamaParse o LlamaCloud, o cuando un PDF escaneado, una imagen o un documento con tablas complejas no se pueda leer bien de otra forma.
+description: Convierte documentos difíciles (PDF escaneados o con tablas complejas, Word, PowerPoint, Excel, imágenes) a Markdown o texto con LlamaParse, el servicio en la nube de LlamaIndex, controlando que el consumo no supere los créditos gratis del mes. Toma los documentos de su carpeta Documentos_entrada y deja los resultados en Documentos_parseados, ambas dentro de .claude/skills/parsear-documento. Úsala cuando el usuario pida parsear, extraer o convertir el contenido de un documento con LlamaParse o LlamaCloud, o cuando un PDF escaneado, una imagen o un documento con tablas complejas no se pueda leer bien de otra forma.
 compatibility: Requiere Python 3.9+, la librería llama-cloud>=2.8 y una clave de LlamaCloud en el archivo .env de la carpeta de la skill.
 ---
 
@@ -12,14 +12,21 @@ LlamaParse sube el documento a LlamaCloud y devuelve su contenido por página. C
 
 ## Carpetas
 
-- **`Parsear_documentos/Documentos_entrada/`**: aquí el usuario deja los documentos a parsear. No los modifiques ni muevas.
-- **`Parsear_documentos/Documentos_parseados/`**: aquí quedan los resultados (`<nombre>.md` o `.txt`; nunca se sobrescriben, se agrega `_v2`).
+Todo lo de esta skill está dentro de `SKILL_DIR`:
+
+- **`SKILL_DIR/Documentos_entrada/`**: aquí el usuario deja los documentos a parsear. No los modifiques ni muevas.
+- **`SKILL_DIR/Documentos_parseados/`**: aquí quedan los resultados (`<nombre>.md` o `.txt`; nunca se sobrescriben, se agrega `_v2`).
+- **`SKILL_DIR/.llamaparse/consumo.csv`**: registro de créditos gastados (lo escribe el script).
+- **`SKILL_DIR/.env`**: clave y configuración personal (no se sube a GitHub; modelo en `SKILL_DIR/plantilla_env.txt`).
+- **`SKILL_DIR/configurar_parsear_documento.ps1`**: configurador de una sola vez.
+
+El contenido de `Documentos_entrada/`, `Documentos_parseados/` y `.llamaparse/` no se sube a GitHub (puede ser información de clientes); solo las carpetas vacías.
 
 El script crea las carpetas si faltan. El usuario no necesita mencionarlas ni etiquetarlas.
 
 ## Antes de usarla (una sola vez)
 
-Todo se deja listo con un solo comando, que el usuario ejecuta en PowerShell desde la raíz del repositorio: `powershell -ExecutionPolicy Bypass -File .\configurar_parsear_documento.ps1`. Instala Python y las librerías si faltan, crea `SKILL_DIR/.env` desde `plantilla_env.txt` y abre el Bloc de notas para que el usuario pegue su clave.
+Todo se deja listo con un solo comando, que el usuario ejecuta en PowerShell desde la raíz del repositorio: `powershell -ExecutionPolicy Bypass -File .\.claude\skills\parsear-documento\configurar_parsear_documento.ps1`. Instala Python y las librerías si faltan, crea `SKILL_DIR/.env` desde `SKILL_DIR/plantilla_env.txt` y abre el Bloc de notas para que el usuario pegue su clave.
 
 1. La clave va en `SKILL_DIR/.env` (`.claude/skills/parsear-documento/.env`): `LLAMA_CLOUD_API_KEY=llx-...`. También se acepta un `.env` en la raíz del repositorio. Si falta, el script lo dice; indica al usuario que ejecute el comando de arriba y, si aún no tiene clave, cómo crearla (cloud.llamaindex.ai → **API Key** → **Generate New Key** → **Create new key**). **Nunca pidas que te la escriba en el chat, no leas ni muestres el `.env` y no pongas la clave en otro archivo**: `.env` no se sube a GitHub.
 2. Si falta la librería (`python -c "import llama_cloud"` falla): `python -m pip install -r requirements.txt`.
@@ -41,7 +48,7 @@ Las planillas se cobran por hoja. Re-parsear el mismo archivo dentro de 48 h no 
 ### 1. Elegir el documento
 - Si el usuario solo invoca `/parsear-documento` (o pide "parsea los documentos"), se procesan los **pendientes** de `Documentos_entrada/`: los que aún no tienen un resultado con su mismo nombre en `Documentos_parseados/`. El script los encuentra solo; no le pases archivos.
 - Si nombra o adjunta un archivo concreto (ruta o `@`), aunque esté en otra carpeta, pásalo como argumento; el resultado igual va a `Documentos_parseados/`. Para repetir uno ya parseado, también se indica por nombre.
-- Si no hay pendientes, dile que copie los documentos en `Parsear_documentos/Documentos_entrada/`.
+- Si no hay pendientes, dile que copie los documentos en `.claude/skills/parsear-documento/Documentos_entrada/`.
 
 ### 2. Estimar SIEMPRE antes de parsear
 ```bash
@@ -64,7 +71,7 @@ Sin archivos procesa los pendientes de `Documentos_entrada/` (los mismos de la e
 - `--confirmar` solo después de que el usuario aceptó una estimación aproximada.
 - `--permitir-exceso` **solo** si el usuario acepta explícitamente pasar el presupuesto mensual (en Pay as you go, sin créditos los trabajos se pausan; con un medio de pago, el exceso se cobra a USD 1,50 por 1.000 créditos). Nunca lo uses por tu cuenta.
 
-El script sube el archivo, espera el resultado, guarda `Parsear_documentos/Documentos_parseados/<nombre>.md` (o `.txt`; nunca sobrescribe, agrega `_v2`), **borra el archivo de LlamaCloud** para que no se cobre almacenamiento y anota los créditos reales cobrados en `.llamaparse/consumo.csv`.
+El script sube el archivo, espera el resultado, guarda `SKILL_DIR/Documentos_parseados/<nombre>.md` (o `.txt`; nunca sobrescribe, agrega `_v2`), **borra el archivo de LlamaCloud** para que no se cobre almacenamiento y anota los créditos reales cobrados en `SKILL_DIR/.llamaparse/consumo.csv`.
 
 Códigos de salida: 2 = falta clave o librería, 3 = entrada inválida o estimación pendiente de confirmar, 4 = superaría el presupuesto del mes.
 

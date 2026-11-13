@@ -4,9 +4,10 @@ Parsea documentos con LlamaParse (servicio en la nube de LlamaIndex) y los guard
 controlando que el consumo del mes no supere el presupuesto de créditos (por defecto, los 10.000 créditos
 gratis mensuales del plan Pay as you go).
 
-Carpetas (proyecto Parsear_documentos/ en la raíz del repositorio; se crean si no existen):
-  Parsear_documentos/Documentos_entrada/     documentos a parsear
-  Parsear_documentos/Documentos_parseados/   resultados (.md o .txt; nunca se sobrescriben)
+Carpetas (dentro de la skill, .claude/skills/parsear-documento/; se crean si no existen):
+  Documentos_entrada/     documentos a parsear
+  Documentos_parseados/   resultados (.md o .txt; nunca se sobrescriben)
+  .llamaparse/consumo.csv registro de créditos gastados
 
 Uso:
   python parsear.py --estimar                        # costo de los documentos pendientes, sin subir nada
@@ -49,10 +50,10 @@ import zipfile
 # Créditos por página según el tarifario oficial (developers.llamaindex.ai/python/cloud/general/pricing).
 CREDITOS_POR_PAGINA = {"fast": 1, "cost_effective": 3, "agentic": 10, "agentic_plus": 25}
 PRESUPUESTO_POR_DEFECTO = 10000  # créditos gratis al mes del plan Pay as you go
-CARPETA_PROYECTO = "Parsear_documentos"
+CARPETA_SKILL = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CARPETA_ENTRADA = "Documentos_entrada"
 CARPETA_SALIDA = "Documentos_parseados"
-REGISTRO = os.path.join(".llamaparse", "consumo.csv")
+REGISTRO = os.path.join(CARPETA_SKILL, ".llamaparse", "consumo.csv")
 CAMPOS_REGISTRO = ["fecha", "archivo", "tier", "paginas", "creditos_estimados", "creditos_reales", "job_id",
                    "salida"]
 EXT_DOCUMENTO = {".pdf", ".docx", ".doc", ".pptx", ".ppt", ".xlsx", ".xls", ".csv", ".tsv", ".odt", ".ods",
@@ -86,15 +87,11 @@ def buscar_raiz():
 
 
 def carpetas_proyecto(raiz):
-    """(entrada, salida) del proyecto Parsear_documentos; se crean si faltan."""
-    base = os.path.join(raiz, CARPETA_PROYECTO)
-    entrada, salida = os.path.join(base, CARPETA_ENTRADA), os.path.join(base, CARPETA_SALIDA)
+    """(entrada, salida) dentro de la carpeta de la skill; se crean si faltan."""
+    entrada, salida = os.path.join(CARPETA_SKILL, CARPETA_ENTRADA), os.path.join(CARPETA_SKILL, CARPETA_SALIDA)
     os.makedirs(entrada, exist_ok=True)
     os.makedirs(salida, exist_ok=True)
     return entrada, salida
-
-
-CARPETA_SKILL = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def cargar_env(raiz):
@@ -205,7 +202,7 @@ def elegir_tier(ruta, pedido, texto_por_pagina):
 # ----------------------------------------------------------------------------- registro de consumo
 
 def leer_registro(raiz):
-    ruta = os.path.join(raiz, REGISTRO)
+    ruta = REGISTRO
     if not os.path.isfile(ruta):
         return []
     with open(ruta, encoding="utf-8-sig", newline="") as fh:
@@ -213,7 +210,7 @@ def leer_registro(raiz):
 
 
 def anotar(raiz, fila):
-    ruta = os.path.join(raiz, REGISTRO)
+    ruta = REGISTRO
     os.makedirs(os.path.dirname(ruta), exist_ok=True)
     nuevo = not os.path.isfile(ruta)
     with open(ruta, "a", encoding="utf-8-sig" if nuevo else "utf-8", newline="") as fh:
@@ -383,7 +380,7 @@ def main():
     archivos = a.archivos
     if not archivos:
         pendientes, parseados, otros = documentos_de_entrada(raiz)
-        carpeta = os.path.join(CARPETA_PROYECTO, CARPETA_ENTRADA)
+        carpeta = os.path.relpath(carpetas_proyecto(raiz)[0], raiz).replace("\\", "/")
         for p in parseados:
             print(f"Ya parseado (se omite; para repetirlo, indícalo por nombre): {os.path.relpath(p, raiz)}")
         for p in otros:
@@ -446,7 +443,7 @@ def main():
         print("Falta la clave de LlamaCloud. Créala en cloud.llamaindex.ai → API Key → Generate New Key y guárdala "
               "en .claude/skills/parsear-documento/.env:\n  LLAMA_CLOUD_API_KEY=llx-...\n"
               "Para configurarlo todo de una vez, ejecuta en PowerShell desde la raíz del repositorio:\n"
-              "  powershell -ExecutionPolicy Bypass -File .\\configurar_parsear_documento.ps1")
+              "  powershell -ExecutionPolicy Bypass -File .\\.claude\\skills\\parsear-documento\\configurar_parsear_documento.ps1")
         sys.exit(2)
     try:
         from llama_cloud import LlamaCloud

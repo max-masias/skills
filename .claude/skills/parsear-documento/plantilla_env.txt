@@ -1,5 +1,6 @@
-# Modelo del .env de la skill parsear-documento (.claude\skills\parsear-documento\.env).
-# No lo copies a mano: ejecuta  powershell -ExecutionPolicy Bypass -File .\configurar_parsear_documento.ps1
+# Modelo del .env de la skill parsear-documento (se crea en esta misma carpeta).
+# No lo copies a mano: desde la raíz del repositorio, en PowerShell, ejecuta
+#   powershell -ExecutionPolicy Bypass -File .\.claude\skills\parsear-documento\configurar_parsear_documento.ps1
 # El archivo .env NO se sube a GitHub: cada persona usa su propia clave.
 
 # Clave de LlamaCloud: cloud.llamaindex.ai -> API Key -> Generate New Key

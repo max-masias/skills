@@ -27,9 +27,6 @@ a Claude Code a hacer una tarea concreta siempre de la misma forma.
   |-- Generador_informes_MD\     Proyecto de la skill informe-desde-md
   |   |-- Archivos_MD\             -> aquí van los .md de entrada
   |   |-- Informe_generado\        -> aquí salen los informes
-  |-- Parsear_documentos\        Proyecto de la skill parsear-documento
-  |   |-- Documentos_entrada\      -> aquí van los documentos a parsear
-  |   |-- Documentos_parseados\    -> aquí salen los .md resultantes
   |-- entradas\                  Archivos de entrada del resto de skills
   |                                (Word, PDF de requerimientos, etc.)
   |-- salidas\                   Resultados, una subcarpeta por skill
@@ -37,13 +34,21 @@ a Claude Code a hacer una tarea concreta siempre de la misma forma.
   |                                que se cambien las skills)
   |-- INSTRUCCIONES_SKILLS.txt   Este archivo
   |-- requirements.txt           Librerías de Python necesarias
-  |-- plantilla_env.txt          Modelo del .env de parsear-documento (el .env real
-  |                                queda en .claude\skills\parsear-documento\ y
-  |                                no se sube a GitHub)
+
+  La skill parsear-documento es la excepción: todo lo suyo está dentro de
+  su carpeta de skill:
+  .claude\skills\parsear-documento\
+  |-- SKILL.md, scripts\           la skill
+  |-- Documentos_entrada\          -> aquí van los documentos a parsear
+  |-- Documentos_parseados\        -> aquí salen los .md resultantes
+  |-- configurar_parsear_documento.ps1   configurador (una sola vez)
+  |-- plantilla_env.txt            modelo del .env
+  |-- .env                         la clave (cada persona la suya; no se sube)
+  |-- .llamaparse\                 registro de créditos gastados (no se sube)
 
 Regla general: lo que se le da a una skill va en su carpeta de entrada y
-lo que produce aparece en su carpeta de salida. Nunca se escribe nada
-dentro de .claude\.
+lo que produce aparece en su carpeta de salida. Nada se escribe dentro de
+.claude\ salvo en la carpeta de parsear-documento.
 
 
 --------------------------------------------------------------------------
@@ -261,16 +266,16 @@ Pedir    : /parsear-documento   (procesa los documentos de
            /parsear-documento @ruta/archivo.pdf   -> un archivo concreto
            "¿cuánto costaría?"            -> solo estima, no gasta créditos
            "¿cuántos créditos me quedan?" -> muestra el consumo del mes
-Resultado: Parsear_documentos\Documentos_parseados\<archivo>.md
+Resultado: .claude\skills\parsear-documento\Documentos_parseados\<archivo>.md
            (nunca sobrescribe: si se repite, crea <archivo>_v2.md)
 Créditos : El plan gratuito trae 10.000 créditos por mes (no se acumulan).
            Costo por página: fast 1 · cost_effective 3 · agentic 10 ·
            agentic_plus 25. Con 10.000 créditos alcanzan, por ejemplo,
            ~3.300 páginas de documentos digitales o 1.000 escaneadas.
            Re-parsear el mismo archivo dentro de 48 h no cuesta.
-           La skill registra lo gastado en .llamaparse\consumo.csv (solo
-           lo hecho con esta skill en este equipo; el saldo oficial está en
-           cloud.llamaindex.ai).
+           La skill registra lo gastado en .llamaparse\consumo.csv, dentro
+           de su carpeta (solo lo hecho con esta skill en este equipo; el
+           saldo oficial está en cloud.llamaindex.ai).
 Notas    : El documento se sube a los servidores de LlamaIndex (quedan en
            caché 48 h, no se usan para entrenar modelos y la skill borra el
            archivo al terminar). Confirmar que está permitido antes de
@@ -304,13 +309,14 @@ Notas    : El documento se sube a los servidores de LlamaIndex (quedan en
           - Ir a la carpeta del repositorio (cambiar la ruta por la propia):
                 cd "C:\ruta\a\Claude_skills"
           - Ejecutar:
-                powershell -ExecutionPolicy Bypass -File .\configurar_parsear_documento.ps1
+                powershell -ExecutionPolicy Bypass -File .\.claude\skills\parsear-documento\configurar_parsear_documento.ps1
+            (todo en una sola línea)
           El configurador hace solo:
             a) Instala Python 3.12 si no está (con winget o desde python.org,
                sin pedir permisos de administrador). Tarda unos minutos.
             b) Instala las librerías de requirements.txt.
             c) Crea el archivo .claude\skills\parsear-documento\.env a partir
-               de plantilla_env.txt.
+               de la plantilla_env.txt de esa misma carpeta.
             d) Abre ese .env en el Bloc de notas.
 
   Paso 5. Pegar la clave
@@ -328,24 +334,25 @@ Notas    : El documento se sube a los servidores de LlamaIndex (quedan en
               Python y librerías: OK
               Clave encontrada: llx-...XXXX (NN caracteres)
               .env excluido de GitHub: OK
-              Listo. Copia un documento en Parsear_documentos\Documentos_entrada\ ...
+              Listo. Copia un documento en .claude\skills\parsear-documento\Documentos_entrada\ ...
           Si algo sale en rojo o amarillo, corregirlo y repetir el Paso 4.
           Se puede ejecutar todas las veces que haga falta: no borra nada
           ni cambia una clave ya guardada.
 
   Paso 7. Primera prueba
           - Copiar un documento corto (1-2 páginas) en
-            Parsear_documentos\Documentos_entrada\
+            .claude\skills\parsear-documento\Documentos_entrada\
           - Abrir la carpeta del repositorio en Claude Code y empezar un chat
             NUEVO (para que cargue la skill).
           - Escribir:  ¿cuánto costaría parsear los documentos?   (no gasta)
           - Escribir:  /parsear-documento
-          - El resultado aparece en Parsear_documentos\Documentos_parseados\
+          - El resultado aparece en
+            .claude\skills\parsear-documento\Documentos_parseados\
           - El saldo oficial se ve en cloud.llamaindex.ai.
 
   Qué NO se sube a GitHub (lo excluye .gitignore):
           - .claude\skills\parsear-documento\.env (la clave)
-          - .llamaparse\ (registro local de consumo)
+          - .claude\skills\parsear-documento\.llamaparse\ (registro local de consumo)
           - el contenido de Documentos_entrada y Documentos_parseados
 
 
@@ -371,7 +378,7 @@ Notas    : El documento se sube a los servidores de LlamaIndex (quedan en
 - /parsear-documento dice "Falta la clave de LlamaCloud":
   falta el archivo .claude\skills\parsear-documento\.env o la línea
   LLAMA_CLOUD_API_KEY=llx-...; volver a ejecutar
-  configurar_parsear_documento.ps1 (ver 4.13, Paso 4).
+  el configurador (ver 4.13, Paso 4).
 
 - El configurador dice "Falta Python" o "No se pudo instalar Python":
   instalar Python desde https://www.python.org/downloads/ marcando

@@ -1,31 +1,25 @@
 ﻿# Deja lista la skill /parsear-documento en este equipo. Se puede ejecutar las veces que haga falta.
-#   1) Instala la versión nueva de la skill si está en _nuevo_skills
-#   2) Crea .claude\skills\parsear-documento\.env (desde plantilla_env.txt) si no existe
-#   3) Instala las librerías de Python (requirements.txt)
+#   1) Comprueba la skill y crea sus carpetas Documentos_entrada y Documentos_parseados
+#   2) Crea el .env de la skill (desde plantilla_env.txt) si no existe
+#   3) Instala Python si falta y las librerías de requirements.txt
 #   4) Abre ese .env en el Bloc de notas para pegar la clave
 #   5) Comprueba que todo esté en orden (sin mostrar la clave)
-# Uso, desde esta carpeta:  powershell -ExecutionPolicy Bypass -File .\configurar_parsear_documento.ps1
+# Uso, desde la raíz del repositorio:
+#   powershell -ExecutionPolicy Bypass -File .\.claude\skills\parsear-documento\configurar_parsear_documento.ps1
 
 $ErrorActionPreference = "Stop"
-Set-Location -LiteralPath $PSScriptRoot
+# Este archivo está en <repositorio>\.claude\skills\parsear-documento: se trabaja desde la raíz del repositorio
+Set-Location -LiteralPath (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..\..\..")).Path
 function Paso($t) { Write-Host ""; Write-Host "== $t" -ForegroundColor Cyan }
 
-# 1) Skill
+# 1) Skill y carpetas
 Paso "Skill parsear-documento"
 $skill = ".claude\skills\parsear-documento"
-if (Test-Path -LiteralPath "_nuevo_skills\parsear-documento") {
-    # Copia encima de la skill instalada sin borrar lo que no viene en la actualización (por ejemplo, el .env)
-    New-Item -ItemType Directory -Force -Path $skill | Out-Null
-    Copy-Item -Path "_nuevo_skills\parsear-documento\*" -Destination $skill -Recurse -Force
-    Remove-Item -LiteralPath "_nuevo_skills\parsear-documento" -Recurse -Force
-    if (-not (Get-ChildItem -LiteralPath "_nuevo_skills" -Force)) { Remove-Item -LiteralPath "_nuevo_skills" }
-    Write-Host "Versión nueva instalada en $skill"
-} elseif (Test-Path -LiteralPath "$skill\SKILL.md") {
-    Write-Host "Ya instalada en $skill"
-} else {
-    Write-Host "No se encontró la skill parsear-documento." -ForegroundColor Red; exit 1
+if (-not (Test-Path -LiteralPath "$skill\SKILL.md")) {
+    Write-Host "No se encontró $skill\SKILL.md (¿el repositorio está completo?)." -ForegroundColor Red; exit 1
 }
-New-Item -ItemType Directory -Force -Path "Parsear_documentos\Documentos_entrada", "Parsear_documentos\Documentos_parseados" | Out-Null
+New-Item -ItemType Directory -Force -Path "$skill\Documentos_entrada", "$skill\Documentos_parseados" | Out-Null
+Write-Host "Skill en $skill (documentos en Documentos_entrada, resultados en Documentos_parseados)"
 
 # 2) .env (dentro de la carpeta de la skill)
 Paso "Archivo .env"
@@ -35,7 +29,7 @@ if (-not (Test-Path -LiteralPath $envPath)) {
         Move-Item -LiteralPath ".env" -Destination $envPath
         Write-Host "Movido el .env de la raíz a $envPath"
     } else {
-        Copy-Item -LiteralPath "plantilla_env.txt" -Destination $envPath
+        Copy-Item -LiteralPath "$skill\plantilla_env.txt" -Destination $envPath
         Write-Host "Creado $envPath a partir de plantilla_env.txt"
     }
 } else {
@@ -117,7 +111,7 @@ if ($py -and $libsOk) { & $py .claude\skills\parsear-documento\scripts\parsear.p
 
 Write-Host ""
 if ($ok) {
-    Write-Host "Listo. Copia un documento en Parsear_documentos\Documentos_entrada\, abre un chat nuevo de Claude" -ForegroundColor Green
+    Write-Host "Listo. Copia un documento en $skill\Documentos_entrada\, abre un chat nuevo de Claude" -ForegroundColor Green
     Write-Host "y escribe /parsear-documento (para ver el costo sin gastar: pregunta '¿cuánto costaría?')." -ForegroundColor Green
 } else {
     Write-Host "Todavía falta algo (lo marcado en rojo o amarillo). Corrígelo y vuelve a ejecutar este script." -ForegroundColor Yellow
