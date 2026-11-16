@@ -37,3 +37,9 @@ REORGANIZACION.txt
 !.claude/skills/parsear-documento/Documentos_entrada/.gitkeep
 .claude/skills/parsear-documento/Documentos_parseados/*
 !.claude/skills/parsear-documento/Documentos_parseados/.gitkeep
+
+# Archivos de archivo-a-markdown (pueden ser de clientes): solo se suben las carpetas vacías
+.claude/skills/archivo-a-markdown/Archivos_entrada/*
+!.claude/skills/archivo-a-markdown/Archivos_entrada/.gitkeep
+.claude/skills/archivo-a-markdown/Markdown_generado/*
+!.claude/skills/archivo-a-markdown/Markdown_generado/.gitkeep

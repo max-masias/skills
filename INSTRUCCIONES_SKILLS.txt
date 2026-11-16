@@ -19,7 +19,7 @@ Una "skill" es un paquete de instrucciones (y a veces scripts) que le enseña
 a Claude Code a hacer una tarea concreta siempre de la misma forma.
 
   Claude_skills\                (carpeta del repositorio; puede tener otro nombre)
-  |-- .claude\skills\            Las 13 skills (una carpeta por skill)
+  |-- .claude\skills\            Las 14 skills (una carpeta por skill)
   |-- Generador_facturas_AWS\    Proyecto de la skill factura-aws-acres
   |   |-- Comprobantes_AWS\        -> aquí van los PDF de AWS
   |   |-- Datos_Factura\           -> datos del emisor, de ACRES y numeración
@@ -35,8 +35,8 @@ a Claude Code a hacer una tarea concreta siempre de la misma forma.
   |-- INSTRUCCIONES_SKILLS.txt   Este archivo
   |-- requirements.txt           Librerías de Python necesarias
 
-  La skill parsear-documento es la excepción: todo lo suyo está dentro de
-  su carpeta de skill:
+  Las skills parsear-documento y archivo-a-markdown son la excepción:
+  todo lo suyo está dentro de su carpeta de skill:
   .claude\skills\parsear-documento\
   |-- SKILL.md, scripts\           la skill
   |-- Documentos_entrada\          -> aquí van los documentos a parsear
@@ -45,10 +45,16 @@ a Claude Code a hacer una tarea concreta siempre de la misma forma.
   |-- plantilla_env.txt            modelo del .env
   |-- .env                         la clave (cada persona la suya; no se sube)
   |-- .llamaparse\                 registro de créditos gastados (no se sube)
+  .claude\skills\archivo-a-markdown\
+  |-- SKILL.md, scripts\           la skill
+  |-- Archivos_entrada\            -> aquí van los archivos a convertir
+  |-- Markdown_generado\           -> aquí salen los .md resultantes
+  |-- configurar_archivo_a_markdown.ps1   configurador (una sola vez)
 
 Regla general: lo que se le da a una skill va en su carpeta de entrada y
 lo que produce aparece en su carpeta de salida. Nada se escribe dentro de
-.claude\ salvo en la carpeta de parsear-documento.
+.claude\ salvo en las carpetas de parsear-documento y
+archivo-a-markdown.
 
 
 --------------------------------------------------------------------------
@@ -68,6 +74,8 @@ c) Librerías: abrir una terminal en la carpeta del repositorio y
 
 d) Solo para /parsear-documento: seguir la guía paso a paso de la sección
    4.13 (un comando que instala todo y pide pegar la clave de LlamaCloud).
+   Para /archivo-a-markdown: un comando (sección 4.14); no necesita
+   cuenta ni clave.
 
 e) Opcional: pandoc (https://pandoc.org) mejora la conversión de Word a
    Markdown. Sin pandoc la skill docx-a-markdown funciona igual.
@@ -356,6 +364,85 @@ Notas    : El documento se sube a los servidores de LlamaIndex (quedan en
           - el contenido de Documentos_entrada y Documentos_parseados
 
 
+..........................................................................
+4.14 /archivo-a-markdown  -  Cualquier archivo a Markdown en el propio equipo
+..........................................................................
+Qué hace : Lo mismo que /parsear-documento (un .md por archivo, con
+           títulos, párrafos, listas, tablas, el texto de las imágenes y un
+           separador por página), pero TODO en este equipo y solo con
+           librerías de Python: sin internet, sin cuenta, sin clave y sin
+           créditos. El documento nunca sale del computador, así que es la
+           opción para documentos de clientes o confidenciales.
+           Lee PDF digitales y escaneados (con OCR en español), Word,
+           PowerPoint, Excel, CSV e imágenes.
+Antes    : Una sola vez por equipo. En PowerShell, desde la carpeta del
+           repositorio:
+             powershell -ExecutionPolicy Bypass -File .\.claude\skills\archivo-a-markdown\configurar_archivo_a_markdown.ps1
+           (todo en una sola línea). Instala Python 3.12 si falta (sin
+           permisos de administrador), las librerías de requirements.txt
+           (unos 150 MB la primera vez) y prueba el OCR. Al final debe
+           mostrar en verde:
+             Python y librerías: OK
+             OCR (escaneados e imágenes): OK
+             Archivos de entrada y resultados excluidos de GitHub: OK
+             Listo. ...
+           Después: cerrar y volver a abrir VS Code / Antigravity.
+Pedir    : /archivo-a-markdown   (convierte los archivos de
+           Archivos_entrada que todavía no tienen resultado)
+           /archivo-a-markdown @ruta/archivo.pdf  -> un archivo concreto
+           "¿cuánto tardaría?"   -> estima el tiempo sin convertir nada
+           "solo las páginas 1 a 10" -> convierte solo esa parte
+Modos    : Igual que los niveles de LlamaParse, se puede pedir uno:
+             rápido   (= fast)           texto y tablas; lo más veloz
+             estándar (= cost_effective) por defecto: + texto de imágenes,
+                                         tablas combinadas y unidas entre
+                                         páginas, índice como tabla, y
+                                         Claude pasa los diagramas a
+                                         Mermaid (como LlamaParse)
+             preciso  (= agentic)        + tablas sin bordes, OCR a mayor
+                                         resolución, fotos corregidas
+             agente   (= agentic_plus)   preciso + Claude revisa también
+                                         tablas, OCR dudoso e imágenes
+                                         mirando la imagen
+           Ejemplos: "/archivo-a-markdown en modo preciso",
+                     "conviértelo con la máxima calidad, como LlamaParse"
+           Para revisar diagramas y lo dudoso, Claude ve la imagen de esas
+           partes; la conversión en sí sigue siendo local. Para que nada
+           pase por Claude: "sin revisión" (los diagramas salen como texto).
+Opciones : Se piden con palabras, por ejemplo:
+           "las tablas en HTML" · "también un Excel con las tablas" ·
+           "guarda las imágenes" · "con capturas de cada página" ·
+           "respetando la disposición (formulario)" · "incluye las
+           diapositivas ocultas" · "sin leer las imágenes" ·
+           "ignora el 8 % de arriba de cada página"
+           Siempre activo: enlaces, quitar marcas de agua y texto oculto,
+           quitar encabezados y pies repetidos, datos de gráficos de
+           PowerPoint como tabla, cambios controlados de Word aplicados.
+Entrada  : .claude\skills\archivo-a-markdown\Archivos_entrada\
+Resultado: .claude\skills\archivo-a-markdown\Markdown_generado\<archivo>.md
+           (nunca sobrescribe: si se repite, crea <archivo>_v2.md)
+Tiempo   : PDF digital: menos de 1 s por página. Páginas escaneadas e
+           imágenes (OCR): unos 4 a 12 s por página según el modo y el
+           equipo.
+           Ejemplo real: documento técnico de ACRES (18 páginas, 3 con
+           diagramas) en unos 50 s; plan de negocio en Word de 103 páginas
+           con 20 imágenes en unos 2 minutos.
+Calidad  : En el documento técnico de ACRES recuperó el 97,7 % del texto
+           que obtuvo LlamaParse, con la misma estructura de títulos y
+           listas. Diferencias: los diagramas salen como el texto que
+           contienen (LlamaParse los redibuja); las tablas de PDF sin
+           líneas y las de escaneos salen como texto; la letra manuscrita
+           se lee mal. En esos casos, si el documento puede subirse a la
+           nube, usar /parsear-documento (sección 4.13).
+Notas    : No lee los formatos antiguos .doc, .ppt ni .xls: guardarlos
+           como .docx, .pptx o .xlsx desde Office. Tampoco PDF con
+           contraseña de apertura (guardarlos sin contraseña). Las fotos de
+           celular se enderezan solas. El contenido de Archivos_entrada y
+           Markdown_generado no se sube a GitHub.
+           Diferencia con /docx-a-markdown: aquella es solo para Word;
+           esta acepta cualquier formato.
+
+
 
 
 --------------------------------------------------------------------------
@@ -396,6 +483,17 @@ Notas    : El documento se sube a los servidores de LlamaIndex (quedan en
 - /parsear-documento se detiene por presupuesto:
   se acabaron los créditos del mes; usar menos páginas (--paginas), un
   tier más barato o esperar al día 1 del mes siguiente.
+
+- /archivo-a-markdown dice "Faltan librerías de Python":
+  ejecutar el configurador de la sección 4.14 (o, desde la carpeta del
+  repositorio: python -m pip install -r requirements.txt).
+
+- /archivo-a-markdown dice "Formato no soportado" con .doc/.ppt/.xls:
+  abrir el archivo en Office y guardarlo como .docx, .pptx o .xlsx.
+
+- /archivo-a-markdown tarda mucho:
+  son páginas escaneadas o con muchas imágenes (el OCR es lo lento). Pedir
+  solo algunas páginas, o "sin leer las imágenes" si no hacen falta.
 
 - Claude pide permiso para ejecutar comandos:
   es normal la primera vez; se puede elegir "permitir siempre" para los

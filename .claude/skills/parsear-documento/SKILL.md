@@ -90,4 +90,5 @@ El documento se sube a los servidores de LlamaIndex (Norteamérica o Europa, seg
 ## Con otras skills
 - El Markdown resultante se puede copiar a `Generador_informes_MD/Archivos_MD/` como fuente de `informe-desde-md` (solo si el usuario lo pide).
 - Un RFP escaneado o complejo se puede parsear primero y luego usar con `propuesta-proyecto`.
+- `archivo-a-markdown` hace lo mismo en el propio equipo, solo con Python: gratis, sin internet y sin que el documento salga del computador. Úsala por defecto para documentos confidenciales; esta skill (LlamaParse) conviene cuando el resultado local no alcance (diagramas que haya que redibujar, tablas muy irregulares) y el documento pueda subirse a la nube.
 - Para un Word sencillo, `docx-a-markdown` es gratis y local; usa esta skill cuando aquella no alcance.
