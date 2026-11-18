@@ -55,10 +55,11 @@ Usa `estandar` salvo que el usuario pida otra cosa o el documento lo requiera. S
 | `--ocr auto\|siempre\|nunca` | — | `siempre` sirve para PDF con capa de texto dañada; `nunca`, para ir rápido. |
 | `--sin-imagenes` | `ignore_text_in_image` | No lee el texto dentro de las imágenes. |
 | `--incluir-ocultas` | `include_hidden_slides` | Incluye diapositivas y hojas de Excel ocultas (por defecto se omiten). |
+| `--incluir-repetidas` | — | Lee todas las copias de las imágenes repetidas. Por defecto, cada imagen repetida (logos, encabezados y pies gráficos, marcas de agua) se lee una sola vez: la primera vez que aparece. |
 | `--instrucciones "..."` | `custom_prompt` | Pedido puntual que Claude aplica al revisar (p. ej., "pasa los montos a una sola tabla"). |
 | `--sin-revision` | — | No marca nada para revisión: nada del documento pasa por Claude. Úsalo si el usuario lo pide. |
 
-Siempre activo (como en LlamaParse): índice (tabla de contenido) como tabla de sección y página; subtítulos sueltos en negrita ("¿Cómo funciona?") como título; enlaces como `[texto](url)`; quitar marcas de agua en diagonal y texto oculto (blanco sin fondo); detectar fuentes dañadas y leer esas páginas con OCR; quitar encabezados y pies de página repetidos; datos de los gráficos de PowerPoint como tabla; cambios controlados de Word aplicados (texto insertado sí, eliminado no); bloques separados de una hoja de Excel como tablas distintas.
+Siempre activo (como en LlamaParse): índice (tabla de contenido) como tabla de sección y página; subtítulos sueltos en negrita ("¿Cómo funciona?") como título; enlaces como `[texto](url)`; quitar marcas de agua en diagonal y texto oculto (blanco sin fondo); detectar fuentes dañadas y leer esas páginas con OCR; quitar encabezados y pies de página repetidos; leer una sola vez las imágenes repetidas (un logo en cada página aparece solo la primera vez; si una imagen se repite solo una vez, por ejemplo un diagrama, la copia queda como "La misma imagen de la página N"); datos de los gráficos de PowerPoint como tabla; cambios controlados de Word aplicados (texto insertado sí, eliminado no); bloques separados de una hoja de Excel como tablas distintas.
 
 ## Qué usa para cada formato
 

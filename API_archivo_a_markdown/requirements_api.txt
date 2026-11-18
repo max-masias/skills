@@ -1,0 +1,4 @@
+# Librerías de la API (además de las de la skill, que están en requirements.txt de la raíz del repositorio)
+fastapi>=0.110          # el framework de la API: rutas, validación de datos y documentación automática (/docs)
+uvicorn>=0.27           # el servidor que atiende las conexiones HTTP y ejecuta la app
+python-multipart>=0.0.9 # para recibir archivos subidos (formularios multipart/form-data)

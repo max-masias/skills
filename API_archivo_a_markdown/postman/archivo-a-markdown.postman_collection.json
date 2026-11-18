@@ -1,0 +1,587 @@
+{
+  "info": {
+    "_postman_id": "6f1d2c1e-7a7b-4c55-9a51-0a2a8a6c2f01",
+    "name": "API archivo-a-markdown",
+    "description": "Convierte PDF, Word, PowerPoint, Excel, CSV e imágenes a Markdown en este equipo (sin internet ni servicios externos). Antes de usarla, enciende la API con iniciar_api.ps1. Guía completa: API_archivo_a_markdown/GUIA_POSTMAN.md",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:8000"
+    },
+    {
+      "key": "claveApi",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "1. ¿La API está encendida? (salud)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Responde 200', () => pm.response.to.have.status(200));",
+              "const j = pm.response.json();",
+              "pm.test('Estado ok', () => pm.expect(j.estado).to.eql('ok'));",
+              "pm.test('Encuentra el script de la skill', () => pm.expect(j.script_encontrado).to.be.true);",
+              "pm.test('No faltan librerías', () => pm.expect(j.librerias_faltantes).to.be.empty);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/salud",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "salud"
+          ]
+        },
+        "description": "Comprueba que la API está encendida, que encuentra el script de la skill y que no faltan librerías."
+      }
+    },
+    {
+      "name": "2. Formatos y modos aceptados",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Responde 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/formatos",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "formatos"
+          ]
+        },
+        "description": "Lista las extensiones y los modos que acepta /convertir."
+      }
+    },
+    {
+      "name": "3. Estimar tiempo (sin convertir)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Responde 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{claveApi}}",
+            "disabled": true,
+            "description": "Solo si la API se encendió con $env:AAM_CLAVE_API. Actívala y pon la clave en la variable claveApi."
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/estimar",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "estimar"
+          ]
+        },
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "archivo",
+              "type": "file",
+              "src": [],
+              "description": "Pulsa 'Select Files' > 'New file from local machine' y elige el documento (PDF, Word, PowerPoint, Excel, CSV o imagen). No uses 'Files uploaded to team': eso lo sube a la nube de Postman."
+            },
+            {
+              "key": "modo",
+              "value": "estandar",
+              "type": "text",
+              "description": "rapido | estandar | preciso"
+            }
+          ]
+        },
+        "description": "Calcula cuánto tardaría la conversión, sin convertir."
+      }
+    },
+    {
+      "name": "4. Convertir → JSON (recomendado)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Responde 200', () => pm.response.to.have.status(200));",
+              "const j = pm.response.json();",
+              "pm.test('Trae el Markdown', () => pm.expect(j.markdown).to.be.a('string').and.not.empty);",
+              "pm.test('Trae los detalles', () => pm.expect(j.detalles.paginas).to.be.above(0));",
+              "console.log('Detalles:', JSON.stringify(j.detalles));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{claveApi}}",
+            "disabled": true,
+            "description": "Solo si la API se encendió con $env:AAM_CLAVE_API. Actívala y pon la clave en la variable claveApi."
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "archivo",
+              "type": "file",
+              "src": [],
+              "description": "Pulsa 'Select Files' > 'New file from local machine' y elige el documento (PDF, Word, PowerPoint, Excel, CSV o imagen). No uses 'Files uploaded to team': eso lo sube a la nube de Postman."
+            },
+            {
+              "key": "modo",
+              "value": "estandar",
+              "type": "text",
+              "description": "rapido | estandar | preciso"
+            },
+            {
+              "key": "respuesta",
+              "value": "json",
+              "type": "text",
+              "description": "json | md | zip"
+            },
+            {
+              "key": "formato",
+              "value": "markdown",
+              "type": "text",
+              "description": "markdown | texto | espacial",
+              "disabled": true
+            },
+            {
+              "key": "paginas",
+              "value": "",
+              "type": "text",
+              "description": "Solo esas páginas, p. ej. 1-5,8 (vacío = todas)",
+              "disabled": true
+            },
+            {
+              "key": "tablas",
+              "value": "auto",
+              "type": "text",
+              "description": "auto | markdown | html",
+              "disabled": true
+            },
+            {
+              "key": "ocr",
+              "value": "auto",
+              "type": "text",
+              "description": "auto | siempre | nunca",
+              "disabled": true
+            },
+            {
+              "key": "sin_imagenes",
+              "value": "false",
+              "type": "text",
+              "description": "true = no leer el texto de las imágenes (más rápido)",
+              "disabled": true
+            },
+            {
+              "key": "tablas_sin_bordes",
+              "value": "false",
+              "type": "text",
+              "description": "true = buscar también tablas sin líneas",
+              "disabled": true
+            },
+            {
+              "key": "unir_tablas",
+              "value": "true",
+              "type": "text",
+              "description": "true = unir tablas que siguen en la página siguiente",
+              "disabled": true
+            },
+            {
+              "key": "incluir_ocultas",
+              "value": "false",
+              "type": "text",
+              "description": "true = incluir diapositivas y hojas ocultas",
+              "disabled": true
+            },
+            {
+              "key": "incluir_repetidas",
+              "value": "false",
+              "type": "text",
+              "description": "true = leer todas las copias de logos y encabezados repetidos",
+              "disabled": true
+            },
+            {
+              "key": "recortar",
+              "value": "",
+              "type": "text",
+              "description": "Márgenes a ignorar \"arriba,abajo\", p. ej. 0.08,0.06",
+              "disabled": true
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/convertir",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "convertir"
+          ]
+        },
+        "description": "Convierte el archivo y devuelve un JSON con detalles (páginas, tablas, imágenes), avisos, segundos y el Markdown."
+      }
+    },
+    {
+      "name": "5. Convertir → Markdown para leer",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Responde 200', () => pm.response.to.have.status(200));",
+              "pm.test('Es Markdown', () => pm.expect(pm.response.headers.get('Content-Type')).to.include('text/markdown'));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{claveApi}}",
+            "disabled": true,
+            "description": "Solo si la API se encendió con $env:AAM_CLAVE_API. Actívala y pon la clave en la variable claveApi."
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "archivo",
+              "type": "file",
+              "src": [],
+              "description": "Pulsa 'Select Files' > 'New file from local machine' y elige el documento (PDF, Word, PowerPoint, Excel, CSV o imagen). No uses 'Files uploaded to team': eso lo sube a la nube de Postman."
+            },
+            {
+              "key": "modo",
+              "value": "estandar",
+              "type": "text",
+              "description": "rapido | estandar | preciso"
+            },
+            {
+              "key": "respuesta",
+              "value": "md",
+              "type": "text",
+              "description": "json | md | zip"
+            },
+            {
+              "key": "formato",
+              "value": "markdown",
+              "type": "text",
+              "description": "markdown | texto | espacial",
+              "disabled": true
+            },
+            {
+              "key": "paginas",
+              "value": "",
+              "type": "text",
+              "description": "Solo esas páginas, p. ej. 1-5,8 (vacío = todas)",
+              "disabled": true
+            },
+            {
+              "key": "tablas",
+              "value": "auto",
+              "type": "text",
+              "description": "auto | markdown | html",
+              "disabled": true
+            },
+            {
+              "key": "ocr",
+              "value": "auto",
+              "type": "text",
+              "description": "auto | siempre | nunca",
+              "disabled": true
+            },
+            {
+              "key": "sin_imagenes",
+              "value": "false",
+              "type": "text",
+              "description": "true = no leer el texto de las imágenes (más rápido)",
+              "disabled": true
+            },
+            {
+              "key": "tablas_sin_bordes",
+              "value": "false",
+              "type": "text",
+              "description": "true = buscar también tablas sin líneas",
+              "disabled": true
+            },
+            {
+              "key": "unir_tablas",
+              "value": "true",
+              "type": "text",
+              "description": "true = unir tablas que siguen en la página siguiente",
+              "disabled": true
+            },
+            {
+              "key": "incluir_ocultas",
+              "value": "false",
+              "type": "text",
+              "description": "true = incluir diapositivas y hojas ocultas",
+              "disabled": true
+            },
+            {
+              "key": "incluir_repetidas",
+              "value": "false",
+              "type": "text",
+              "description": "true = leer todas las copias de logos y encabezados repetidos",
+              "disabled": true
+            },
+            {
+              "key": "recortar",
+              "value": "",
+              "type": "text",
+              "description": "Márgenes a ignorar \"arriba,abajo\", p. ej. 0.08,0.06",
+              "disabled": true
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/convertir",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "convertir"
+          ]
+        },
+        "description": "Devuelve solo el texto Markdown, sin JSON. Míralo en la pestaña Body (Raw) o usa Send > Send and Download para guardarlo como .md."
+      }
+    },
+    {
+      "name": "6. Convertir → ZIP con tablas en Excel e imágenes",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Responde 200', () => pm.response.to.have.status(200));",
+              "pm.test('Es un zip', () => pm.expect(pm.response.headers.get('Content-Type')).to.include('zip'));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{claveApi}}",
+            "disabled": true,
+            "description": "Solo si la API se encendió con $env:AAM_CLAVE_API. Actívala y pon la clave en la variable claveApi."
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "archivo",
+              "type": "file",
+              "src": [],
+              "description": "Pulsa 'Select Files' > 'New file from local machine' y elige el documento (PDF, Word, PowerPoint, Excel, CSV o imagen). No uses 'Files uploaded to team': eso lo sube a la nube de Postman."
+            },
+            {
+              "key": "modo",
+              "value": "estandar",
+              "type": "text",
+              "description": "rapido | estandar | preciso"
+            },
+            {
+              "key": "respuesta",
+              "value": "zip",
+              "type": "text",
+              "description": "json | md | zip"
+            },
+            {
+              "key": "tablas_excel",
+              "value": "true",
+              "type": "text",
+              "description": "Incluir las tablas en un .xlsx"
+            },
+            {
+              "key": "guardar_imagenes",
+              "value": "true",
+              "type": "text",
+              "description": "Incluir las imágenes del documento"
+            },
+            {
+              "key": "formato",
+              "value": "markdown",
+              "type": "text",
+              "description": "markdown | texto | espacial",
+              "disabled": true
+            },
+            {
+              "key": "paginas",
+              "value": "",
+              "type": "text",
+              "description": "Solo esas páginas, p. ej. 1-5,8 (vacío = todas)",
+              "disabled": true
+            },
+            {
+              "key": "tablas",
+              "value": "auto",
+              "type": "text",
+              "description": "auto | markdown | html",
+              "disabled": true
+            },
+            {
+              "key": "ocr",
+              "value": "auto",
+              "type": "text",
+              "description": "auto | siempre | nunca",
+              "disabled": true
+            },
+            {
+              "key": "sin_imagenes",
+              "value": "false",
+              "type": "text",
+              "description": "true = no leer el texto de las imágenes (más rápido)",
+              "disabled": true
+            },
+            {
+              "key": "tablas_sin_bordes",
+              "value": "false",
+              "type": "text",
+              "description": "true = buscar también tablas sin líneas",
+              "disabled": true
+            },
+            {
+              "key": "unir_tablas",
+              "value": "true",
+              "type": "text",
+              "description": "true = unir tablas que siguen en la página siguiente",
+              "disabled": true
+            },
+            {
+              "key": "incluir_ocultas",
+              "value": "false",
+              "type": "text",
+              "description": "true = incluir diapositivas y hojas ocultas",
+              "disabled": true
+            },
+            {
+              "key": "incluir_repetidas",
+              "value": "false",
+              "type": "text",
+              "description": "true = leer todas las copias de logos y encabezados repetidos",
+              "disabled": true
+            },
+            {
+              "key": "recortar",
+              "value": "",
+              "type": "text",
+              "description": "Márgenes a ignorar \"arriba,abajo\", p. ej. 0.08,0.06",
+              "disabled": true
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/convertir",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "convertir"
+          ]
+        },
+        "description": "Devuelve un .zip con el .md, un .xlsx con las tablas y las imágenes. Usa Send > Send and Download para guardarlo."
+      }
+    },
+    {
+      "name": "7. Error de ejemplo: modo que no existe",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Responde 422 (dato no válido)', () => pm.response.to.have.status(422));",
+              "pm.test('Explica el error en español', () => pm.expect(pm.response.json().detail).to.include('modo'));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{claveApi}}",
+            "disabled": true,
+            "description": "Solo si la API se encendió con $env:AAM_CLAVE_API. Actívala y pon la clave en la variable claveApi."
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/convertir",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "convertir"
+          ]
+        },
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "archivo",
+              "type": "file",
+              "src": [],
+              "description": "Pulsa 'Select Files' > 'New file from local machine' y elige el documento (PDF, Word, PowerPoint, Excel, CSV o imagen). No uses 'Files uploaded to team': eso lo sube a la nube de Postman."
+            },
+            {
+              "key": "modo",
+              "value": "turbo",
+              "type": "text",
+              "description": "Valor inválido a propósito"
+            }
+          ]
+        },
+        "description": "Muestra cómo responde la API a un dato inválido: código 422 y un mensaje en español en 'detail'."
+      }
+    }
+  ]
+}

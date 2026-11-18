@@ -34,6 +34,8 @@ a Claude Code a hacer una tarea concreta siempre de la misma forma.
   |                                que se cambien las skills)
   |-- INSTRUCCIONES_SKILLS.txt   Este archivo
   |-- requirements.txt           Librerías de Python necesarias
+  |-- API_archivo_a_markdown\   API web local que usa archivo-a-markdown
+                                 (ver sección 4.15 y su LEEME.md)
 
   Las skills parsear-documento y archivo-a-markdown son la excepción:
   todo lo suyo está dentro de su carpeta de skill:
@@ -416,8 +418,11 @@ Opciones : Se piden con palabras, por ejemplo:
            diapositivas ocultas" · "sin leer las imágenes" ·
            "ignora el 8 % de arriba de cada página"
            Siempre activo: enlaces, quitar marcas de agua y texto oculto,
-           quitar encabezados y pies repetidos, datos de gráficos de
-           PowerPoint como tabla, cambios controlados de Word aplicados.
+           quitar encabezados y pies repetidos, leer una sola vez las
+           imágenes repetidas (un logo en cada página aparece solo la
+           primera vez; pedir "incluye las imágenes repetidas" para
+           leerlas todas), datos de gráficos de PowerPoint como tabla,
+           cambios controlados de Word aplicados.
 Entrada  : .claude\skills\archivo-a-markdown\Archivos_entrada\
 Resultado: .claude\skills\archivo-a-markdown\Markdown_generado\<archivo>.md
            (nunca sobrescribe: si se repite, crea <archivo>_v2.md)
@@ -441,6 +446,33 @@ Notas    : No lee los formatos antiguos .doc, .ppt ni .xls: guardarlos
            Markdown_generado no se sube a GitHub.
            Diferencia con /docx-a-markdown: aquella es solo para Word;
            esta acepta cualquier formato.
+
+
+4.15 API de archivo-a-markdown  -  La misma skill como servicio web
+     (no es un comando de Claude; la usan otros programas)
+
+Para qué : Que otro programa (Python, PowerShell, Postman, n8n, una app
+           web) envíe un archivo y reciba el Markdown, sin abrir Claude.
+           Ejecuta el mismo script de /archivo-a-markdown, en este equipo,
+           sin revisión de Claude, y no guarda ningún documento.
+Iniciar  : desde la raíz, en PowerShell (dejar la ventana abierta):
+             powershell -ExecutionPolicy Bypass -File .\API_archivo_a_markdown\iniciar_api.ps1
+           Instala lo que falte (fastapi, uvicorn, python-multipart) y la
+           deja en http://127.0.0.1:8000. Ctrl+C para detenerla.
+Probar   : en el navegador, http://127.0.0.1:8000/docs  ->  POST /convertir
+           -> Try it out -> elegir archivo -> Execute.
+           O en otra ventana:
+             powershell -ExecutionPolicy Bypass -File .\API_archivo_a_markdown\probar_api.ps1 "C:\ruta\doc.pdf"
+Rutas    : GET /salud, GET /formatos, POST /estimar, POST /convertir
+           (campos: archivo, modo rapido|estandar|preciso, paginas,
+           tablas, ocr, respuesta json|md|zip, entre otros).
+Postman  : Importar los dos archivos de API_archivo_a_markdown\postman\
+           (colección y entorno), elegir el entorno "Archivo a Markdown
+           — Local" y probar con ejemplos\ejemplo_prueba.pdf. Paso a paso
+           en API_archivo_a_markdown\GUIA_POSTMAN.md.
+Notas    : Solo accesible desde este equipo. Para exigir una clave,
+           definir $env:AAM_CLAVE_API antes de iniciarla. Explicación
+           completa de la lógica en API_archivo_a_markdown\LEEME.md.
 
 
 

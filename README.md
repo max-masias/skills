@@ -31,6 +31,15 @@ Las instrucciones detalladas de cada skill (qué hace, dónde dejar los archivos
 | `/balances` | Reporte financiero en HTML desde JSON |
 | `/revisar-ingles` | Corrector de textos en inglés |
 
+## API de archivo-a-markdown
+
+`API_archivo_a_markdown/` publica la skill `archivo-a-markdown` como una API web local (FastAPI), para que otros programas conviertan archivos a Markdown sin abrir Claude. Todo se procesa en el equipo y no queda ningún documento guardado.
+
+- Iniciar: `powershell -ExecutionPolicy Bypass -File .\API_archivo_a_markdown\iniciar_api.ps1`
+- Probar en el navegador: <http://127.0.0.1:8000/docs>
+- Probar en Postman paso a paso (colección lista para importar y PDF de ejemplo): `API_archivo_a_markdown/GUIA_POSTMAN.md`
+- Guía completa (lógica, parámetros, errores, seguridad): `API_archivo_a_markdown/LEEME.md`
+
 ## Estructura
 
 ```
@@ -39,4 +48,5 @@ Generador_facturas_AWS/    entradas y salidas de factura-aws-acres
 Generador_informes_MD/     entradas y salidas de informe-desde-md
 entradas/                  archivos de entrada del resto de skills
 salidas/                   resultados, una subcarpeta por skill
+API_archivo_a_markdown/    API web local que usa la skill archivo-a-markdown
 ```

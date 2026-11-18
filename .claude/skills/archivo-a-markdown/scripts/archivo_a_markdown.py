@@ -27,6 +27,7 @@ Códigos de salida: 0 ok · 1 error en algún documento · 2 faltan librerías �
 """
 import argparse
 import datetime as dt
+import hashlib
 import io
 import os
 import re
@@ -361,6 +362,80 @@ def guardar_png(img, ruta):
 RECURSOS = Recursos(os.devnull)          # se reemplaza por documento en convertir()
 
 
+class Repetidas:
+    """Imágenes que se repiten en el documento (logos, marcas de agua, encabezados y pies gráficos): se leen
+    y se escriben una sola vez, la primera vez que aparecen. Se reconocen de tres formas:
+    - el mismo objeto de imagen del PDF (mismos bytes) reutilizado en varias páginas, antes de dibujarlo;
+    - la misma imagen dibujada (mismos píxeles), aunque el PDF o el Word la guarde varias veces;
+    - el mismo texto reconocido por OCR (el mismo logo guardado con distinta calidad o tamaño).
+    Cada copia omitida deja una marca; al final, si la imagen aparece 3 veces o más (logo, encabezado) las marcas
+    se quitan, y si aparece 2 veces queda una nota "La misma imagen de la página N" (p. ej. un diagrama repetido)."""
+
+    VECES_LOGO = 3
+
+    def __init__(self, activo=True):
+        self.activo = activo
+        self.grupos = {}            # huella -> (número de grupo, página donde apareció primero)
+
+    def buscar(self, *claves):
+        """Grupo (n, página) de la primera clave ya vista, o None. No registra nada."""
+        if not self.activo:
+            return None
+        return next((self.grupos[c] for c in claves if c and c in self.grupos), None)
+
+    def registrar(self, pagina, *claves):
+        """Si alguna clave ya se vio, devuelve su grupo (es una copia); si no, crea un grupo nuevo y devuelve None.
+        En ambos casos todas las claves quedan apuntando al grupo."""
+        claves = [c for c in claves if c]
+        if not self.activo or not claves:
+            return None
+        grupo = self.buscar(*claves)
+        nuevo = grupo or (len(set(self.grupos.values())) + 1, pagina)
+        for c in claves:
+            self.grupos[c] = nuevo
+        return grupo
+
+    @staticmethod
+    def clave_texto(lineas):
+        t = re.sub(r"\s+", " ", " ".join(lineas)).strip().lower()
+        # Solo textos con algo de contenido: dos imágenes distintas que solo dicen "1" o "OK" no son la misma
+        return "txt:" + t if len(re.sub(r"\W", "", t)) >= 6 else None
+
+    @staticmethod
+    def marca(grupo):
+        return f"\x00REPETIDA {grupo[0]} {grupo[1]}\x00"
+
+    @staticmethod
+    def resolver(paginas):
+        """Cambia las marcas de copias omitidas por una nota (imagen repetida 1 vez) o nada (3 veces o más)."""
+        patron = re.compile("\x00REPETIDA (\\d+) (\\d+)\x00")
+        copias = Counter(m.group(1) for _, partes in paginas for x in partes if isinstance(x, str)
+                         for m in patron.finditer(x))
+        for _, partes in paginas:
+            for k, x in enumerate(partes):
+                if isinstance(x, str) and "\x00REPETIDA" in x:
+                    partes[k] = patron.sub(lambda m: "" if copias[m.group(1)] + 1 >= Repetidas.VECES_LOGO else
+                                           f"> **[Imagen]** La misma imagen de la página {m.group(2)}.", x)
+            partes[:] = [x for x in partes if not (isinstance(x, str) and not x.strip())]   # sin huecos (unir tablas)
+
+
+def huella(img):
+    """Huella de los píxeles de una imagen (dos imágenes iguales dan la misma huella)."""
+    return "px:" + hashlib.md5(f"{img.mode}{img.size}".encode() + img.tobytes()).hexdigest()
+
+
+def huella_pdf(im):
+    """Huella del objeto de imagen de un PDF (pdfplumber), sin dibujarlo. None si no se puede leer."""
+    try:
+        datos = im["stream"].get_rawdata()
+        return "pdf:" + hashlib.md5(str(im.get("srcsize")).encode() + (datos or b"")).hexdigest() if datos else None
+    except Exception:
+        return None
+
+
+REPETIDAS = Repetidas()                  # se reemplaza por documento en convertir()
+
+
 # ----------------------------------------------------------------------------- OCR (RapidOCR, local)
 
 _OCR = None
@@ -515,14 +590,27 @@ def bloques_de_imagen(img, pagina, stats, args):
     out = []
     if es_icono(img):
         return out
-    ref = RECURSOS.imagen(img, pagina)
-    if ref:
-        out.append(ref)
+    clave = huella(img)
+    grupo = REPETIDAS.buscar(clave)
+    if grupo:                                       # la misma imagen ya apareció antes (logo, encabezado...)
+        stats["imagenes_repetidas"] += 1
+        return [Repetidas.marca(grupo)]
+    cajas, lineas, filas = [], [], None
     if CONFIG["ocr_imagenes"] and args.ocr != "nunca":
         cajas = ocr_imagen(ampliar_para_ocr(img))
         lineas = [l["text"] for l in lineas_de_cajas_ocr(cajas)]
         stats["imagenes_ocr"] += 1
         filas = filas_de_cajas(cajas) if not parece_diagrama(cajas) else None
+        grupo = REPETIDAS.registrar(pagina, clave, None if filas else Repetidas.clave_texto(lineas))
+        if grupo:                                   # otra copia del mismo logo con distinta calidad o tamaño
+            stats["imagenes_repetidas"] += 1
+            return [Repetidas.marca(grupo)]
+    else:
+        REPETIDAS.registrar(pagina, clave)
+    ref = RECURSOS.imagen(img, pagina)
+    if ref:
+        out.append(ref)
+    if CONFIG["ocr_imagenes"] and args.ocr != "nunca":
         if filas:                                   # tabla chica pegada como imagen: directo como tabla
             out.append({"tabla": filas, "pagina": pagina})
             stats["tablas"] += 1
@@ -555,6 +643,8 @@ def limpiar_linea(t):
     t = RE_PUNTOS_GUIA.sub(" … ", t)
     t = re.sub(r"(?<=\S)\s*\(cid:\d+\)", "", t)       # glifos sin traducción a mitad de línea
     t = t.replace("­", "").replace("ﬁ", "fi").replace("ﬂ", "fl")
+    # Al cambiar de fuente (cursiva, negrita) la puntuación queda como palabra aparte: "Interview ." -> "Interview."
+    t = re.sub(r"(?<=[^\s.…]) +(?=[.,;:!?](?:\s|$))", "", t)
     return re.sub(r"[ \t]{2,}", " ", t).strip()
 
 
@@ -1059,7 +1149,7 @@ def convertir_pdf(ruta, args, stats):
         arriba, abajo = CONFIG["recorte"]
         for i in indices:
             p = pdf.pages[i]
-            info = {"n": i + 1, "pagina": p, "ocr": False, "tablas": [], "lineas": [], "imagenes": []}
+            info = {"n": i + 1, "pagina": p, "ocr": False, "tablas": [], "lineas": [], "imagenes": [], "claves": {}}
             if args.ocr == "siempre" or (args.ocr == "auto" and es_escaneada(p)):
                 info["ocr"] = True
             else:
@@ -1098,8 +1188,9 @@ def convertir_pdf(ruta, args, stats):
                         grande = w * h > CONFIG["area_imagen"] * area and w > 40 and h > 30
                         franja = w > 0.35 * p.width and h > 8      # fila de tabla pegada como imagen
                         if (grande or franja) and not fondo and not recortada:
-                            info["imagenes"].append((max(0, im["x0"]), max(0, im["top"]),
-                                                     min(p.width, im["x1"]), min(p.height, im["bottom"])))
+                            caja = (max(0, im["x0"]), max(0, im["top"]), min(p.width, im["x1"]), min(p.height, im["bottom"]))
+                            info["imagenes"].append(caja)
+                            info["claves"][caja] = huella_pdf(im)
             paginas.append(info)
 
         # Tamaño del texto normal y niveles de título (en todo el documento)
@@ -1199,15 +1290,33 @@ def convertir_pdf(ruta, args, stats):
                         stats["tablas_sin_bordes"] += 1
                     else:
                         try:
-                            recorte = recortar_png(pagina_png(), obj, resolucion(p) / 72.0, margen=0)
-                            ref = RECURSOS.imagen(recorte, n)
-                            if ref:
-                                partes.append(ref)
+                            clave_pdf = info["claves"].get(obj)
+                            grupo = REPETIDAS.buscar(clave_pdf)           # mismo objeto ya visto: ni se dibuja
+                            if not grupo:
+                                recorte = recortar_png(pagina_png(), obj, resolucion(p) / 72.0, margen=0)
+                                clave_px = huella(recorte)
+                                grupo = REPETIDAS.buscar(clave_px)        # mismos píxeles que una anterior
+                            if grupo:
+                                REPETIDAS.registrar(n, clave_pdf)
+                                stats["imagenes_repetidas"] += 1
+                                partes.append(Repetidas.marca(grupo))
+                                continue
+                            cajas_img, lineas_img, filas_img = [], [], None
                             if CONFIG["ocr_imagenes"] and args.ocr != "nunca":
                                 cajas_img = ocr_imagen(ampliar_para_ocr(recorte))
                                 lineas_img = [l["text"] for l in lineas_de_cajas_ocr(cajas_img)]
                                 stats["imagenes_ocr"] += 1
                                 filas_img = filas_de_cajas(cajas_img) if not parece_diagrama(cajas_img) else None
+                            grupo = REPETIDAS.registrar(n, clave_pdf, clave_px,
+                                                        None if filas_img else Repetidas.clave_texto(lineas_img))
+                            if grupo:                                     # mismo texto: el mismo logo, otra calidad
+                                stats["imagenes_repetidas"] += 1
+                                partes.append(Repetidas.marca(grupo))
+                                continue
+                            ref = RECURSOS.imagen(recorte, n)
+                            if ref:
+                                partes.append(ref)
+                            if CONFIG["ocr_imagenes"] and args.ocr != "nunca":
                                 if filas_img:
                                     partes.append({"tabla": filas_img, "pagina": n})
                                     stats["tablas"] += 1
@@ -1929,6 +2038,12 @@ CONVERSORES = [(EXT_PDF, convertir_pdf), (EXT_WORD, convertir_word), (EXT_PPT, c
                (EXT_TEXTO, convertir_texto)]
 
 
+def es_fila_titulo(fila):
+    """Fila con una sola celda escrita en una tabla de 2 o más columnas: el título de la tabla."""
+    escritas = [c for c in fila if c is not None and c != VERTICAL and str(c).strip()]
+    return len(fila) >= 2 and len(escritas) == 1
+
+
 def unir_tablas_continuas(paginas, stats):
     """Une una tabla que termina una página con la que empieza la siguiente si tienen las mismas columnas
     (merge_continued_tables de LlamaParse). La tabla unida queda en la primera página."""
@@ -1944,6 +2059,10 @@ def unir_tablas_continuas(paginas, stats):
         if not f1 or not f2 or len(f1[0]) != len(f2[0]) or len(f1[0]) < 2:
             continue
         repetido = [str(c or "").strip() for c in f2[0]] == [str(c or "").strip() for c in f1[0]]
+        # Dos tablas con su propio título (primera fila de una sola celda, p. ej. "Write an Email Checklist" y
+        # "Write for an Academic Discussion") son tablas distintas aunque tengan las mismas columnas
+        if not repetido and es_fila_titulo(f1[0]) and es_fila_titulo(f2[0]):
+            continue
         ult["tabla"] = f1 + (f2[1:] if repetido else f2)
         ult.setdefault("paginas_unidas", [ult.get("pagina") or n1]).append(n2)
         b[pri_i] = f"<!-- La tabla que empezaba aquí se unió a la de la página anterior -->"
@@ -2020,15 +2139,17 @@ def render_parte(x):
 
 
 def convertir(ruta, args, raiz):
-    global RECURSOS
+    global RECURSOS, REPETIDAS
     ext = os.path.splitext(ruta)[1].lower()
     conversor = next(fn for exts, fn in CONVERSORES if ext in exts)
     stats = {"paginas": 0, "paginas_ocr": 0, "imagenes_ocr": 0, "tablas": 0, "nota_paginas": "páginas",
              "confianzas": [], "paginas_dudosas": [], "texto_quitado": 0, "paginas_ilegibles": 0,
-             "tablas_sin_bordes": 0, "graficos": 0, "ocultas": 0, "tablas_unidas": 0, "revision": 0}
+             "tablas_sin_bordes": 0, "graficos": 0, "ocultas": 0, "tablas_unidas": 0, "revision": 0,
+             "imagenes_repetidas": 0}
     salida = ruta_salida(ruta, args.formato, args.salida)
     RECURSOS = Recursos(salida, guardar_imagenes=args.guardar_imagenes, capturas=args.capturas,
                         revision=CONFIG["revision"], instrucciones=args.instrucciones)
+    REPETIDAS = Repetidas(activo=not getattr(args, "incluir_repetidas", False))
     t0 = time.time()
     if args.formato == "espacial" and (ext in EXT_PDF or ext in EXT_IMAGEN):
         if ext in EXT_PDF:
@@ -2040,6 +2161,7 @@ def convertir(ruta, args, raiz):
             stats["paginas"] = stats["paginas_ocr"] = 1
     else:
         paginas = conversor(ruta, args, stats)
+    Repetidas.resolver(paginas)
     if CONFIG["unir_tablas"] and ext in EXT_PDF and args.formato != "espacial":
         unir_tablas_continuas(paginas, stats)
     stats["revision"] = RECURSOS.cerrar()
@@ -2050,6 +2172,8 @@ def convertir(ruta, args, raiz):
         detalles.append(f"OCR en {stats['paginas_ocr']}" + (f" (confianza {conf:.0%})" if conf else ""))
     if stats["imagenes_ocr"]:
         detalles.append(f"{stats['imagenes_ocr']} imágenes leídas")
+    if stats["imagenes_repetidas"]:
+        detalles.append(f"{stats['imagenes_repetidas']} imágenes repetidas omitidas")
     if stats["tablas"]:
         detalles.append(f"{stats['tablas']} tablas")
     if stats["tablas_unidas"]:
@@ -2127,6 +2251,8 @@ def main():
     ap.add_argument("--guardar-imagenes", action="store_true", help="guardar las imágenes y enlazarlas en el .md")
     ap.add_argument("--capturas", action="store_true", help="guardar una captura de cada página y enlazarla")
     ap.add_argument("--incluir-ocultas", action="store_true", help="incluir diapositivas y hojas ocultas")
+    ap.add_argument("--incluir-repetidas", action="store_true",
+                    help="leer también las imágenes repetidas (logos y encabezados en cada página); por defecto, una vez")
     ap.add_argument("--recortar", help='quitar márgenes: "arriba,abajo" en fracción de página, p. ej. "0.08,0.06"')
     ap.add_argument("--instrucciones", help="pedido para la revisión de Claude en el modo agente")
     ap.add_argument("--sin-revision", action="store_true",
@@ -2225,6 +2351,8 @@ def main():
             extra.append(f"OCR en {st['paginas_ocr']}")
         if st["imagenes_ocr"]:
             extra.append(f"{st['imagenes_ocr']} imágenes leídas")
+        if st["imagenes_repetidas"]:
+            extra.append(f"{st['imagenes_repetidas']} repetidas omitidas (logos, encabezados)")
         if st["tablas"]:
             extra.append(f"{st['tablas']} tablas")
         if st["tablas_unidas"]:
